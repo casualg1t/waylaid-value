@@ -18,7 +18,7 @@
 
 **License:** MIT License; preserve the included third-party notices.
 
-**Logo:** `assets/waylaid-value-512.png`
+**Logo:** `assets/inv_crate_07.jpg` — the same WoW crate artwork used in-game.
 
 **Screenshots:** `.previews/crates.png`, `.previews/rewards.png` (real in-game captures, capture metadata removed).
 

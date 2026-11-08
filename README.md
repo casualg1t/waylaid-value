@@ -79,4 +79,4 @@ Generated files are written to `outputs/` and ignored by Git. Source is in `addo
 
 ## Credits and licensing
 
-Original addon code is MIT licensed. The reduced ProfessionDB / LibProfessionDB recipe-data extract retains its [MIT notice](addon/WaylaidValue/THIRD_PARTY_LICENSES.txt). Item names, tooltip facts and in-game texture references originate from WoW/Wowhead. Fixture icons are game artwork, not covered by the original-code MIT grant. The listing logo is original project artwork. This is an independent community addon, not affiliated with Blizzard Entertainment.
+Original addon code is MIT licensed. The reduced ProfessionDB / LibProfessionDB recipe-data extract retains its [MIT notice](addon/WaylaidValue/THIRD_PARTY_LICENSES.txt). Item names, tooltip facts and in-game texture references originate from WoW/Wowhead. Fixture icons and the listing crate icon are game artwork, not covered by the original-code MIT grant. This is an independent community addon, not affiliated with Blizzard Entertainment.

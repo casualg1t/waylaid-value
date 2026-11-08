@@ -7,7 +7,7 @@ The addon publishes under its dedicated GitHub identity, casualg1t. The previous
 1. Install the candidate ZIP in Forever and confirm both tabs, minimap launcher, tooltips, scrollbars and filters. Test TSM; only claim Auctionator compatibility after testing that build.
 2. Capture one screenshot per tab. Crop away chat, character/account names and unrelated UI. Save reviewed screenshots in `assets/` before uploading; do not substitute HTML mockups for in-game screenshots.
 3. Run `python3 tools/check.py`. Use the ZIP in `outputs/`, not GitHub's source archive.
-4. Review `docs/CURSEFORGE.md`, choose the tested Forever client version and use the supplied original PNG logo. A failed/unverified integration should remain documented.
+4. Review `docs/CURSEFORGE.md`, choose the tested Forever client version and use the supplied WoW crate icon. A failed/unverified integration should remain documented.
 
 ## CurseForge
 
@@ -53,3 +53,5 @@ CurseForge is a separate submission. Do not claim it is published until the proj
 The first CurseForge file is registered as file 9514517, Release, Forever 1.60.1, with automatic publication after approval selected. Source link saved to GitHub. Public listing is https://www.curseforge.com/wow/addons/waylaid-value; until approved it may be unavailable to other accounts.
 
 The CurseForge CDN ZIP was downloaded and verified byte-for-byte against the public GitHub ZIP. The console advanced to `Processing`; moderation approval was not observed. Both real screenshots were uploaded to the gallery, captioned and saved. Do not re-upload merely because the status has not advanced.
+
+The custom listing mark was replaced on CurseForge with the actual `INV_Crate_07` game icon at the user’s request. The unmodified source asset and attribution are retained in `assets/`; the obsolete custom mark and generator were removed.
