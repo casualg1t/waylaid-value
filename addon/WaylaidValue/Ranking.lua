@@ -35,11 +35,18 @@ function A.Rank(crates, readPrice, includeExpert, level)
   end)
   return rows
 end
-function A.Money(copper)
+function A.Money(copper,colored)
   if copper == nil then return "--" end
   local sign = copper < 0 and "-" or ""
   copper = math.floor(math.abs(copper)+0.5)
   local gold, silver, coin = math.floor(copper/10000), math.floor(copper/100)%100, copper%100
+  if colored then
+   local parts={}
+   if gold>0 then parts[#parts+1]=gold..'|cffffd166g|r'end
+   if silver>0 then parts[#parts+1]=silver..'|cffc7c7cfs|r'end
+   if coin>0 or #parts==0 then parts[#parts+1]=coin..'|cffeda55fc|r'end
+   return sign..table.concat(parts,' ')
+  end
   if gold > 0 then return string.format("%s%dg %ds %dc",sign,gold,silver,coin) end
   return string.format("%s%ds %dc",sign,silver,coin)
 end

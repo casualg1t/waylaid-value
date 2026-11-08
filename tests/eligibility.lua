@@ -56,3 +56,24 @@ assert(not A.ReadCharacter().professionsKnown)
 GetSkillLineInfo=function()return 'Alchimie',false,nil,75,nil,nil,150 end
 assert(A.ReadCharacter().professionsKnown and A.ReadCharacter().professions.Alchemy.skill==75)
 print('PASS: partial and nil profession responses remain unverified; complete legacy fallback recovers.')
+-- Equip permission and role relevance are independent. Use actual tooltip facts.
+local healer=reward("Wisdom's Leather Belt")
+assert(A.UseEligibility(healer,hunter)==true and not A.RoleMatch(healer,hunter,'auto'))
+assert(A.RoleMatch(healer,hunter,'healing')and A.RoleMatch(healer,hunter,'all'))
+assert(A.RoleMatch(reward("Brawler's Leather Belt"),hunter,'auto'))
+assert(not A.RoleMatch(reward("Stormrider's Leather Belt"),hunter,'auto'))
+assert(A.RoleMatch(reward('Pristine Circlet'),priest,'auto'))
+assert(A.RoleMatch(reward('SAF-T Copper Bomb'),hunter,'auto')) -- fire damage is not caster gear
+local bombRoles=A.RewardRoles(reward('SAF-T Copper Bomb'));assert(bombRoles.general and not bombRoles.caster)
+assert(A.RoleMatch(unknown,hunter,'auto')) -- no guessed classification
+assert(not A.RoleMatch(unknown,hunter,'healing')) -- explicit role needs evidence
+local roles,label=A.RewardRoles(healer);assert(roles.healing and not roles.physical and label=='Healing')
+opts={profession='Leatherworking',usable=true,skill=false,role='auto'}
+rows=A.FilterRewards(A.Rewards,hunter,opts)
+for _,entry in ipairs(rows)do assert(A.RoleMatch(entry.reward,hunter,'auto'))end
+assert(A.ItemRequirements[healer.id].quality==3)
+local screenshotProfile={class='HUNTER',level=26,professionsKnown=true,professions={Leatherworking={skill=109},Cooking={skill=2}}}
+local filters={profession='mine',usable=true,skill=true,role='all'}
+assert(#A.FilterRewards(A.Rewards,screenshotProfile,filters)==24)
+filters.role='auto';assert(#A.FilterRewards(A.Rewards,screenshotProfile,filters)==13)
+print('PASS: rarity facts, separate equip/role checks, hunter/healer affinity, hybrid spell gear, unknown roles and general-use bombs.')

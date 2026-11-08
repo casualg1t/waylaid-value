@@ -2,7 +2,7 @@
 local A, objects = {}, {}
 local methods={}
 for name in ("SetPoint SetWidth SetSize SetJustifyH SetTextColor SetColorTexture SetTexture SetTexCoord SetAllPoints SetBackdrop SetBackdropColor SetBackdropBorderColor SetScale SetFrameStrata SetClampedToScreen SetMovable EnableMouse RegisterForDrag RegisterEvent SetWordWrap StartMoving StopMovingOrSizing SetOwner SetItemByID AddLine SetAutoFocus SetNumeric ClearFocus SetFontObject SetTextInsets SetAlpha SetFont"):gmatch("%S+") do methods[name]=function()end end
-for name in ("SetFrameLevel RegisterForClicks SetHighlightTexture ClearAllPoints"):gmatch("%S+") do methods[name]=function()end end
+for name in ("SetFrameLevel RegisterForClicks SetHighlightTexture ClearAllPoints SetVertexColor"):gmatch("%S+") do methods[name]=function()end end
 local new
 new=function(kind,name,parent)
   local o={kind=kind,name=name,parent=parent,shown=true,scripts={},height=258,scroll=0}
@@ -14,6 +14,7 @@ function methods:SetScript(event,fn)self.scripts[event]=fn end
 function methods:CreateFontString()return new("FontString",nil,self)end
 function methods:CreateTexture()return new("Texture",nil,self)end
 function methods:SetText(value)self.value=tostring(value or "")end
+function methods:SetTextColor(r,g,b)self.textColor={r,g,b}end
 function methods:GetText()return self.value end
 function methods:SetHeight(value)self.height=value end
 function methods:GetHeight()return self.height end
@@ -64,8 +65,8 @@ assert(frame and frame:IsShown() and #frame.listRows==22)
 assert(frame.listRows[1].data.crate.id==248705)
 assert(frame:GetWidth()==900 and frame:GetHeight()==730)
 assert(frame.scroll:GetHeight()==288)
-assert(frame.listRows[1].net:GetText()=="13s 3c")
-assert(frame.listRows[1].ratio:GetText()=="65.2c per Favor")
+assert(frame.listRows[1].net:GetText()==A.Money(1303,true))
+assert(frame.listRows[1].ratio:GetText()=="65.2|cffeda55fc|r per Favor")
 assert(frame.listRows[1].net.point[2]+frame.listRows[1].net:GetWidth()<=840)
 assert(frame.detail.options[5].point[3]-frame.detail.options[5]:GetHeight()>=-190)
 frame.listRows[2].scripts.OnClick(frame.listRows[2])
@@ -93,9 +94,9 @@ frame.rewards.held:SetText("0");frame.rewards.learned:SetChecked(false)
 frame.rewards:Refresh()
 assert(frame.rewards.current.reward.name=="Caustic Smog Potion")
 assert(frame.rewards.current.materials==15766)
-assert(frame.rewards.detail.total:GetText()==A.Money(frame.rewards.current.plan.net+15766))
+assert(frame.rewards.detail.total:GetText()==A.Money(frame.rewards.current.plan.net+15766,true))
 frame.rewards.learned:SetChecked(true);frame.rewards.learned.scripts.OnClick()
-assert(frame.rewards.detail.total:GetText()=="1g 57s 66c" and frame.rewards.current.plan.net==0)
+assert(frame.rewards.detail.total:GetText()==A.Money(15766,true) and frame.rewards.current.plan.net==0)
 frame.rewards.learned:SetChecked(false);frame.rewards.held:SetText("180");frame.rewards.held.scripts.OnTextChanged()
 assert(frame.rewards.current.needed==0 and frame.rewards.current.total==15766)
 frame.rewards.search:SetText("no such reward test");frame.rewards.search.scripts.OnTextChanged()
@@ -133,7 +134,8 @@ for _,entry in ipairs(rewards.visible)do assert(entry.skilled and entry.usable a
 assert(rewards.navButtons.Engineering:IsShown()and (not rewards.navButtons.Alchemy or not rewards.navButtons.Alchemy:IsShown()))
 rewards.navButtons.others.scripts.OnClick();assert(rewards.navButtons.Alchemy:IsShown())
 rewards.navButtons.Alchemy.scripts.OnClick();assert(not rewards.skill:GetChecked()and rewards.options.profession=='Alchemy'and rewards.visibleCount==0)
-rewards.usable:SetChecked(false);rewards.usable.scripts.OnClick(rewards.usable);assert(rewards.visibleCount==29)
+rewards.usable:SetChecked(false);rewards.usable.scripts.OnClick(rewards.usable);assert(rewards.visibleCount>0 and rewards.visibleCount<29)
+rewards.role.scripts.OnClick(rewards.role);assert(rewards.options.role=='all'and rewards.visibleCount==29)
 for _,entry in ipairs(rewards.visible)do assert(entry.reward.profession=='Alchemy'and entry.usable==false)end
 rewards.navButtons.all.scripts.OnClick();assert(rewards.visibleCount==#A.Rewards and not rewards.usable:GetChecked()and not rewards.skill:GetChecked())
 rewards.usable:SetChecked(true);rewards.usable.scripts.OnClick(rewards.usable)
@@ -156,7 +158,7 @@ assert(rewards.skill.point[2]+rewards.skill:GetWidth()<=860)
 assert(-rewards.detail.point[3]+rewards.detail:GetHeight()==590)
 for _,b in pairs(rewards.navButtons)do if b:IsShown()then assert(-b.point[3]+b:GetHeight()<=590)end end
 for _,b in ipairs(rewards.detailRows)do assert(b.amount.point[2]+b.amount:GetWidth()<=430 and b.name.point[2]+b.name:GetWidth()<b.amount.point[2])end
-assert(-rewards.detailScroll.point[3]+rewards.detailScroll:GetHeight()<=526)
+assert(-rewards.detailScroll.point[3]+rewards.detailScroll:GetHeight()<=492)
 GetProfessions=function()return nil end;rewards:Refresh();rewards.navButtons.mine.scripts.OnClick()
 assert(rewards.noProfessions:IsShown()and rewards.visibleCount==0)
 rewards.navButtons.all.scripts.OnClick();assert(rewards.visibleCount==#A.Rewards)
@@ -175,6 +177,10 @@ menuItems[1].func();assert(WaylaidValueDB.source=="Auto")
 frame.rewards.armor.scripts.OnClick(frame.rewards.armor);assert(#menuItems==5)
 menuItems[2].func();assert(frame.rewards.options.armor==1)
 menuItems[1].func();assert(frame.rewards.options.armor==nil and frame.rewards.visibleCount==#A.Rewards)
+frame.rewards.role.scripts.OnClick(frame.rewards.role);assert(#menuItems==7)
+menuItems[5].func();assert(frame.rewards.options.role=='healing')
+for _,entry in ipairs(frame.rewards.visible)do assert(A.RoleMatch(entry.reward,frame.rewards.profile,'healing'))end
+menuItems[2].func();assert(frame.rewards.options.role=='all'and frame.rewards.visibleCount==#A.Rewards)
 local row=frame.rewards.listRows[2];row.scripts.OnClick(row)
 assert(frame.rewards.current.reward==row.reward and frame.rewards.detail.title:GetText()==row.reward.name)
 UIDropDownMenu_Initialize=nil;ToggleDropDownMenu=nil
@@ -223,7 +229,7 @@ for _,v in ipairs({{300,200,0},{300,300,45},{200,300,90},{100,300,135},{100,200,
 end
 math.atan,math.atan2=atan,atan2
 -- Real large plans need room for five-digit quantities, not the old 32px field.
-for _,b in ipairs(r.detailRows)do assert(b.qty:GetWidth()==56 and b.icon.point[2]>b.qty:GetWidth())end
+for _,b in ipairs(r.detailRows)do assert(b.qty:GetWidth()==56 and b.icon.holder.point[2]>b.qty:GetWidth())end
 print('PASS: selection ownership preservation, tooltip clearing, Lua 5.1 minimap quadrants and shopping quantity bounds.')
 launch.scripts.OnDragStart(launch);launch:Hide();assert(not launch.scripts.OnUpdate);launch:Show()
 local saved=WaylaidValueDB
@@ -242,3 +248,14 @@ print('PASS: OnHide stops dragging; corrupt settings recover; valid source/Exper
 assert(frame.scroll.ScrollBar.ScrollUpButton.alpha==0 and frame.scroll.ScrollBar.ScrollUpButton.mouse==false)
 assert(frame.scroll.ScrollBar:GetThumbTexture():GetWidth()==4)
 print('PASS: scrollbar template styling branch exercised with explicit template children (not native rendering).')
+local v=frame.rewards
+v.navButtons.all.scripts.OnClick();v.search:SetText("Brawler's Leather Belt");v.search.scripts.OnTextChanged()
+assert(v.current.reward.id==252428 and v.detail.title.textColor[3]==0.87)
+assert(v.listRows[1].name.textColor[1]==0 and v.listRows[1].name.textColor[3]==0.87)
+assert(v.listRows[1].icon.holder and #frame.wvSkin.edge==9 and #frame.wvSkin.fill==9)
+GetItemInfo=function()return 'Live name','link',4 end
+local red,green,blue=A.UI.ItemColor(252428);assert(red==0.64 and blue==0.93)
+GetItemInfo=nil
+v.search:SetText('not an item');v.search.scripts.OnTextChanged();assert(not v.detail.icon.holder:IsShown())
+assert(v.role.point[2]+v.role:GetWidth()<=860)
+print('PASS: role dropdown callbacks, actual rarity-colored list/title, live rarity override, icon-frame hiding and reusable rounded skin.')

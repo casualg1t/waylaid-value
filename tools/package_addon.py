@@ -6,7 +6,7 @@ toc=(folder/'WaylaidValue.toc').read_text()
 version=re.search(r'^## Version: (.+)$',toc,re.M)[1]
 assert re.fullmatch(r'\d+\.\d+\.\d+',version)
 files={line.strip() for line in toc.splitlines() if line.strip() and not line.startswith('#')}
-files.update({'WaylaidValue.toc','THIRD_PARTY_LICENSES.txt'})
+files.update({'WaylaidValue.toc','THIRD_PARTY_LICENSES.txt','SkinFill.tga','SkinRing.tga'})
 assert all(Path(name).name==name and (folder/name).is_file() for name in files)
 payload={name:(folder/name).read_bytes() for name in files}
 payload['README.md']=Path('README.md').read_bytes()

@@ -122,6 +122,30 @@ function A.SkillEligibility(reward,profile)
  if own.skill<reward.skill then return false,'Requires '..reward.profession..' '..reward.skill..' (you: '..own.skill..')'end
  return true
 end
+local roleNames={physical='Physical DPS',caster='Spell DPS',healing='Healing',tank='Tank',general='General'}
+local roleOrder={'physical','caster','healing','tank','general'}
+local classRoles={HUNTER={physical=true},ROGUE={physical=true},WARRIOR={physical=true,tank=true},MAGE={caster=true},WARLOCK={caster=true},PRIEST={caster=true,healing=true}}
+function A.RewardRoles(reward)
+ local meta=A.ItemRequirements and A.ItemRequirements[reward.id]
+ local roles=meta and meta.roles
+ local names={}
+ for _,key in ipairs(roleOrder)do if roles and roles[key]then names[#names+1]=roleNames[key]end end
+ return roles,#names>0 and table.concat(names,' / ')or 'Role unclassified'
+end
+function A.RoleMatch(reward,profile,role)
+ if not role or role=='all'then return true end
+ local roles=A.RewardRoles(reward)
+ -- Keep unclassified items visible rather than inventing a suitability score.
+ if not roles then return role=='auto'end
+ if role=='auto'then
+  if roles.general then return true end
+  local wanted=classRoles[profile.class]
+  if not wanted then return true end -- hybrids need an explicit role choice
+  for key in pairs(wanted)do if roles[key]then return true end end
+  return false
+ end
+ return roles[role]==true
+end
 function A.FilterRewards(rewards,profile,options)
  local rows,summary={},{total=0,hidden=0,unknown=0}
  local query=string.lower(options.search or '')
@@ -135,7 +159,7 @@ function A.FilterRewards(rewards,profile,options)
    local meta=A.RewardRequirements(reward)
    local armorOK=not options.armor or options.armor==''or(meta and meta.classID==4 and meta.subclassID==options.armor)
    if unknown then summary.unknown=summary.unknown+1 end
-   if armorOK and(not options.usable or usable==true)and(not options.skill or skilled==true)then
+   if armorOK and A.RoleMatch(reward,profile,options.role)and(not options.usable or usable==true)and(not options.skill or skilled==true)then
     rows[#rows+1]={reward=reward,usable=usable,useReason=useReason,skilled=skilled,skillReason=skillReason}
    else summary.hidden=summary.hidden+1 end
   end

@@ -42,6 +42,13 @@ local custom={{id=1,name="test",level=10,favor=5,options={{id=3,quantity=2},{id=
 local tie=A.Rank(custom,function(id) if id~=4 then return {value=100} end end,false,60)[1]
 assert(tie.best.item.id==2 and tie.missing==1 and #tie.options==3)
 assert(A.Money(2303)=="23s 3c" and A.Money(nil)=="--")
+assert(A.Money(12345,true)=='1|cffffd166g|r 23|cffc7c7cfs|r 45|cffeda55fc|r')
+assert(A.Money(14,true)=='14|cffeda55fc|r'and A.Money(0,true)=='0|cffeda55fc|r')
+assert(A.Money(-1000,true)=='-10|cffc7c7cfs|r')
+-- Observed 20-Favor turn-in awards 10 silver; it must reduce net cost.
+local checkedTurnIn=false
+for _,r in ipairs(rows)do if r.crate.favor==20 and r.net then assert(r.silver==1000 and r.net==r.gross-1000);checkedTurnIn=true end end
+assert(checkedTurnIn)
 print("PASS: real snapshot integration, cheapest bundle, rewards, ordering, changed prices, levels, missing data, invalid prices, provider failure/fallback, explicit source, ties.")
 local calls=0
 TSM_API={GetCustomPriceValue=function()calls=calls+1;return nil end}

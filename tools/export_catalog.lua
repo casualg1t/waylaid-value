@@ -10,7 +10,18 @@ local function encode(v)
   for _,x in ipairs(v)do result[#result+1]=encode(x)end
   return '['..table.concat(result,',')..']'
  end
- for k,x in pairs(v)do result[#result+1]=quote(k)..':'..encode(x)end
+ for k,x in pairs(v)do result[#result+1]=quote(tostring(k))..':'..encode(x)end
  return '{'..table.concat(result,',')..'}'
 end
-print(encode(A.Rewards))
+if arg and(arg[1]=='requirements'or arg[1]=='preview')then
+ assert(loadfile('addon/WaylaidValue/ItemRequirements.lua'))('WaylaidValue',A)
+ if arg[1]=='preview'then
+  assert(loadfile('addon/WaylaidValue/Eligibility.lua'))('WaylaidValue',A)
+  local profile={class='HUNTER',level=26,professionsKnown=true,professions={Leatherworking={skill=109},Cooking={skill=2}}}
+  for _,reward in ipairs(A.Rewards)do
+   local meta=A.ItemRequirements[reward.id]or {};A.ItemRequirements[reward.id]=meta
+   meta.usable=A.UseEligibility(reward,profile)==true;meta.skilled=A.SkillEligibility(reward,profile)==true
+  end
+ end
+ print(encode(A.ItemRequirements))
+else print(encode(A.Rewards))end

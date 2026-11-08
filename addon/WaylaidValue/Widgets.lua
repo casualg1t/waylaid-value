@@ -1,8 +1,44 @@
 local _,A=...
 -- hors-kit: native WoW Lua widgets; the React kit cannot run in game.
-local U={gold={0.87,0.76,0.49},text={0.93,0.91,0.86},muted={0.66,0.68,0.65},line={0.24,0.25,0.21,1}}
+local U={gold={1,0.82,0.40},text={0.90,0.86,0.78},muted={0.71,0.68,0.61},line={0.31,0.25,0.16,0.65},selection={0.21,0.15,0.08,0.95}}
 A.UI=U
 local unpack=unpack or table.unpack
+local qualityColors={[0]={0.62,0.62,0.62},[1]={1,1,1},[2]={0.12,1,0},[3]={0,0.44,0.87},[4]={0.64,0.21,0.93},[5]={1,0.50,0}}
+function U.ItemColor(id)
+ local quality=A.ItemRequirements and A.ItemRequirements[id]and A.ItemRequirements[id].quality
+ local get=C_Item and C_Item.GetItemInfo or GetItemInfo
+ if get then local ok,_,_,q=pcall(get,id);if ok and type(q)=='number'then quality=q end end
+ local color=ITEM_QUALITY_COLORS and ITEM_QUALITY_COLORS[quality]
+ if color then return color.r,color.g,color.b end
+ return unpack(qualityColors[quality]or U.text)
+end
+function U.ItemText(f,id,name)f:SetText(name or A.ItemName(id));f:SetTextColor(U.ItemColor(id))end
+function U.Money(value)return A.Money(value,true)end
+local function sliced(f,asset,layer)
+ local pieces={}
+ local points={'TOPLEFT','TOP','TOPRIGHT','LEFT','CENTER','RIGHT','BOTTOMLEFT','BOTTOM','BOTTOMRIGHT'}
+ local cuts={0,0.125,0.875,1}
+ for row=1,3 do for col=1,3 do
+  local t=f:CreateTexture(nil,layer);t:SetTexture('Interface\\AddOns\\WaylaidValue\\'..asset)
+  t:SetTexCoord(cuts[col],cuts[col+1],cuts[row],cuts[row+1])
+  if row==2 and col==2 then t:SetPoint('TOPLEFT',4,-4);t:SetPoint('BOTTOMRIGHT',-4,4)
+  elseif col==2 then
+   local side=row==1 and 'TOP'or 'BOTTOM';t:SetPoint(side..'LEFT',4,0);t:SetPoint(side..'RIGHT',-4,0);t:SetHeight(4)
+  elseif row==2 then
+   local side=col==1 and 'LEFT'or 'RIGHT';t:SetPoint('TOP'..side,0,-4);t:SetPoint('BOTTOM'..side,0,4);t:SetWidth(4)
+  else t:SetSize(4,4);t:SetPoint(points[(row-1)*3+col])end
+  pieces[#pieces+1]=t
+ end end
+ return pieces
+end
+function U.Skin(f,fill,edge)
+ if not f.wvSkin then f.wvSkin={fill=sliced(f,'SkinFill','BACKGROUND'),edge=sliced(f,'SkinRing','BORDER')}end
+ for _,t in ipairs(f.wvSkin.fill)do t:SetVertexColor(unpack(fill or {0.075,0.068,0.058,1}))end
+ for _,t in ipairs(f.wvSkin.edge)do t:SetVertexColor(unpack(edge or {0.50,0.39,0.22,0.95}))end
+end
+function U.Row(b)
+ U.Skin(b,{0.055,0.052,0.048,1},{0.28,0.25,0.20,0.65})
+end
 function U.Text(p,x,y,w,value,font,color,align,size)
  local f=p:CreateFontString(nil,'OVERLAY',font or 'GameFontHighlightSmall')
  f:SetPoint('TOPLEFT',x,y);f:SetWidth(w);f:SetJustifyH(align or 'LEFT');f:SetWordWrap(false)
@@ -16,9 +52,17 @@ end
 function U.SetIcon(t,id)
  local get=C_Item and C_Item.GetItemIconByID or GetItemIcon
  t:SetTexture((get and id and id>0 and get(id))or(A.ItemIcons and A.ItemIcons[id])or 'Interface\\Icons\\INV_Misc_QuestionMark')
+ if t.holder then t.holder:SetBackdropBorderColor(U.ItemColor(id))end
 end
 function U.Icon(p,x,y,id,size)
- local t=p:CreateTexture(nil,'ARTWORK');t:SetPoint('TOPLEFT',x,y);t:SetSize(size or 24,size or 24);t:SetTexCoord(0.07,0.93,0.07,0.93);U.SetIcon(t,id);return t
+ local holder=CreateFrame('Frame',nil,p,'BackdropTemplate');holder:SetPoint('TOPLEFT',x,y);holder:SetSize(size or 24,size or 24)
+ holder:SetBackdrop({bgFile='Interface\\Buttons\\WHITE8X8',edgeFile='Interface\\Buttons\\WHITE8X8',edgeSize=1});holder:SetBackdropColor(0.02,0.02,0.02,1)
+ local t=holder:CreateTexture(nil,'ARTWORK');t:SetPoint('TOPLEFT',1,-1);t:SetSize((size or 24)-2,(size or 24)-2);t:SetTexCoord(0.07,0.93,0.07,0.93);t.holder=holder;U.SetIcon(t,id)
+ local show,hide=t.Show,t.Hide
+ function t:Show()show(self);holder:Show()end
+ function t:Hide()hide(self);holder:Hide()end
+ function t:SetShown(on)if on then self:Show()else self:Hide()end end
+ return t
 end
 local requested={}
 function A.ItemName(id,fallback)
@@ -31,7 +75,7 @@ end
 function U.ItemTooltip(b,id,price,extra)
  b:SetScript('OnEnter',function(self)
   GameTooltip:SetOwner(self,'ANCHOR_RIGHT');if GameTooltip.ClearLines then GameTooltip:ClearLines()end;if id and id>0 then GameTooltip:SetItemByID(id)end
-  if price then GameTooltip:AddLine(A.Money(price.value)..' each · '..price.source,0.75,0.75,0.70,true);if price.age then GameTooltip:AddLine('Price age: '..price.age..' day(s)',0.75,0.75,0.70)end end
+  if price then GameTooltip:AddLine(U.Money(price.value)..' each · '..price.source,0.75,0.75,0.70,true);if price.age then GameTooltip:AddLine('Price age: '..price.age..' day(s)',0.75,0.75,0.70)end end
   if extra then GameTooltip:AddLine(extra,0.87,0.76,0.49,true)end;GameTooltip:Show()
  end)
  b:SetScript('OnLeave',function()GameTooltip:Hide()end)
@@ -48,6 +92,7 @@ function U.RewardTooltip(b,reward)
   GameTooltip:AddLine(' ')
   GameTooltip:AddLine(reward.profession..(reward.skill and(' · skill '..reward.skill)or ''),0.87,0.76,0.49)
   if reward.favor then GameTooltip:AddLine((reward.purchase and 'Price: 'or 'Recipe price: ')..reward.favor..' Favor',0.75,0.75,0.70)end
+  local _,role=A.RewardRoles(reward);GameTooltip:AddLine(role,0.75,0.75,0.70,true)
   if A.ReadCharacter then
    local profile=A.ReadCharacter()
    local usable,why=A.UseEligibility(reward,profile)
@@ -61,23 +106,26 @@ function U.RewardTooltip(b,reward)
 end
 function U.Button(p,x,y,w,label,click)
  local b=CreateFrame('Button',nil,p,'BackdropTemplate');b:SetPoint('TOPLEFT',x,y);b:SetSize(w,28)
- b:SetBackdrop({bgFile='Interface\\Buttons\\WHITE8X8',edgeFile='Interface\\Buttons\\WHITE8X8',edgeSize=1});b:SetBackdropColor(0.14,0.16,0.14,1);b:SetBackdropBorderColor(0.39,0.34,0.24,1)
- local f=U.Text(b,5,-7,w-10,label,nil,U.text,'CENTER')
+ U.Skin(b)
+ local f=U.Text(b,5,-7,w-10,label,'GameFontNormal',U.text,'CENTER',12)
  function b:SetText(v)f:SetText(v)end;function b:GetText()return f:GetText()end
  local hover=b:CreateTexture(nil,'HIGHLIGHT');hover:SetAllPoints();hover:SetColorTexture(0.8,0.7,0.4,0.08)
  b:SetScript('OnClick',click);return b
 end
 function U.Edit(p,x,y,w,placeholder)
  local b=CreateFrame('EditBox',nil,p,'BackdropTemplate');b:SetPoint('TOPLEFT',x,y);b:SetSize(w,28)
- b:SetBackdrop({bgFile='Interface\\Buttons\\WHITE8X8',edgeFile='Interface\\Buttons\\WHITE8X8',edgeSize=1});b:SetBackdropColor(0.09,0.11,0.12,1);b:SetBackdropBorderColor(0.32,0.32,0.26,1)
+ U.Skin(b,{0.045,0.040,0.035,1},{0.39,0.32,0.22,0.85})
  b:SetFontObject('GameFontHighlightSmall');b:SetTextInsets(8,8,0,0);b:SetAutoFocus(false)
  b:SetScript('OnEscapePressed',function(self)self:ClearFocus()end);b:SetScript('OnEnterPressed',function(self)self:ClearFocus()end)
  if placeholder then b.hint=U.Text(b,8,-7,w-16,placeholder,nil,U.muted)end;return b
 end
 function U.Tab(p,x,label,click)
- local b=CreateFrame('Button',nil,p);b:SetPoint('TOPLEFT',x,-51);b:SetSize(90,40)
- local f=U.Text(b,0,-13,85,label,'GameFontHighlight',U.muted);local line=U.Fill(b,0,-38,70,2,{0.87,0.76,0.49,1},'ARTWORK')
- function b:SetActive(on)line:SetShown(on);f:SetTextColor(unpack(on and U.gold or U.muted))end
+ local b=CreateFrame('Button',nil,p);b:SetPoint('TOPLEFT',x,-57);b:SetSize(90,32)
+ local f=U.Text(b,0,-9,90,label,'GameFontNormal',U.muted,'CENTER',12)
+ function b:SetActive(on)
+  U.Skin(b,on and {0.20,0.14,0.06,1}or {0.065,0.058,0.048,1},on and {0.80,0.60,0.25,1}or {0.36,0.29,0.19,0.8})
+  f:SetTextColor(unpack(on and U.gold or U.muted))
+ end
  b:SetScript('OnClick',click);return b
 end
 function U.Scroll(p,x,y,w,h)

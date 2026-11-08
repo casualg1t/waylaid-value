@@ -6,6 +6,7 @@ os.chdir(Path(__file__).resolve().parent.parent)
 lua = os.environ.get('LUA', 'lua')
 commands = [
     [sys.executable, 'tools/build_rewards_html.py'],
+    [sys.executable, 'tools/build_ui_preview.py'],
     [sys.executable, 'tools/package_addon.py'],
     *[[lua, 'tests/' + name + '.lua'] for name in ['run', 'rewards', 'eligibility', 'ui-smoke']],
     ['node', 'tests/rewards-html.js'],

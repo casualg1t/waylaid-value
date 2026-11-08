@@ -4,19 +4,18 @@ local frame,selectedID
 local function short(c)return(A.ItemName(c.id,c.name):gsub('^Waylaid Crate: ',''))end
 local function selectRow(row)
  selectedID=row.crate.id;local p=frame.detail
- p.title:SetText(short(row.crate));p.subtitle:SetText('One crate gives '..(row.crate.favor or '?')..' Favor · choose one filling bundle')
- p.cost:SetText(row.price and A.Money(row.price.value)or 'Price missing')
+ U.ItemText(p.title,row.crate.id,short(row.crate));p.subtitle:SetText('One crate gives '..(row.crate.favor or '?')..' Favor · choose one filling bundle')
+ p.cost:SetText(row.price and U.Money(row.price.value)or 'Price missing')
  for i,b in ipairs(p.options)do
   local part=row.options[i]
   if part then
    b:Show();U.SetIcon(b.icon,part.item.id)
-   b.name:SetText(part.item.quantity..' × '..A.ItemName(part.item.id,part.item.name)..(part==row.best and ' · best' or ''))
-   b.name:SetTextColor((unpack or table.unpack)(part==row.best and U.gold or U.text))
-   b.unit:SetText(part.price and A.Money(part.price.value)or '—');b.total:SetText(part.total and A.Money(part.total)or 'Price missing');U.ItemTooltip(b,part.item.id,part.price)
+   U.ItemText(b.name,part.item.id,part.item.quantity..' × '..A.ItemName(part.item.id,part.item.name)..(part==row.best and ' · best' or ''))
+   b.unit:SetText(part.price and U.Money(part.price.value)or '—');b.total:SetText(part.total and U.Money(part.total)or 'Price missing');U.ItemTooltip(b,part.item.id,part.price)
   else b:Hide()end
  end
- p.note:SetText(row.reason or('Upfront '..A.Money(row.gross)..' − silver returned '..A.Money(row.silver)))
- p.net:SetText(row.net and('Net total '..A.Money(row.net))or '')
+ p.note:SetText(row.reason or('Upfront '..U.Money(row.gross)..' − turn-in money '..U.Money(row.silver)))
+ p.net:SetText(row.net and('Net total '..U.Money(row.net))or '')
  if row.missing>0 then p.subtitle:SetText(p.subtitle:GetText()..' · '..row.missing..' unpriced alternative(s)')end
  for _,b in ipairs(frame.listRows)do b.selection:SetShown(b.data and b.data.crate.id==selectedID)end
 end
@@ -27,7 +26,7 @@ function A.UpdatePriceStatus(stats,errors,context)
  elseif next(errors or{})then frame.status:SetText('Price source error · let the addon finish loading, then Refresh')
  elseif stats and stats.tsm and stats.auctionator then frame.status:SetText('Mixed TSM / Auctionator cached prices · item sources in tooltips')
  elseif(stats and stats.auctionator)or mode=='Auctionator'or(mode=='Auto'and not tsm and atr)then frame.status:SetText('Auctionator cached prices'..(stats and stats.maxAge and(' · oldest reported age '..stats.maxAge..' day(s)')or ' · age not provided'))
- else frame.status:SetText('TSM cached prices · AH update time not provided')end
+ else frame.status:SetText('TSM · cached minimum-buyout prices')end
  frame.context:SetText(context or '')
 end
 function A.Refresh()
@@ -40,22 +39,22 @@ function A.Refresh()
  for i,row in ipairs(rows)do
   local b=frame.listRows[i]
   if not b then
-   b=CreateFrame('Button',nil,frame.child);b:SetSize(840,36);b.selection=U.Fill(b,0,0,840,36,{0.20,0.20,0.17,1})
+   b=CreateFrame('Button',nil,frame.child);b:SetSize(840,36);b.selection=U.Fill(b,0,0,840,36,U.selection)
    local hover=b:CreateTexture(nil,'HIGHLIGHT');hover:SetAllPoints();hover:SetColorTexture(0.85,0.74,0.45,0.06);U.Fill(b,0,-35,840,1,{0.19,0.21,0.19,1},'BORDER')
    b.rank=U.Text(b,4,-11,22,'',nil,U.muted);b.crateIcon=U.Icon(b,30,-6,0);b.crate=U.Text(b,62,-11,210,'');b.sub=U.Text(b,62,-22,210,'',nil,U.muted)
    b.itemIcon=U.Icon(b,284,-6,0);b.bundle=U.Text(b,316,-11,224,'');b.favor=U.Text(b,548,-11,42,'',nil,U.text,'RIGHT');b.upfront=U.Text(b,606,-11,100,'',nil,U.text,'RIGHT')
-   b.net=U.Text(b,726,-3,114,'','GameFontNormal',U.gold,'RIGHT');b.ratio=U.Text(b,726,-21,114,'',nil,U.muted,'RIGHT')
+   b.net=U.Text(b,726,-3,114,'','GameFontNormal',U.text,'RIGHT');b.ratio=U.Text(b,726,-21,114,'',nil,U.muted,'RIGHT')
    b:SetScript('OnClick',function(self)selectRow(self.data)end);frame.listRows[i]=b
   end
   b.data=row;b:SetPoint('TOPLEFT',0,-(i-1)*36);b:Show()
   if row.ratio then rank=rank+1;b.rank:SetText(rank)else b.rank:SetText('—')end
-  U.SetIcon(b.crateIcon,row.crate.id);b.crate:SetText(short(row.crate));b.crate:ClearAllPoints()
+  U.SetIcon(b.crateIcon,row.crate.id);U.ItemText(b.crate,row.crate.id,short(row.crate));b.crate:ClearAllPoints()
   if row.reason or row.crate.provisional then b.crate:SetPoint('TOPLEFT',62,-3);b.sub:SetText(row.reason or 'Expert reward provisional');b.sub:Show()
   else b.crate:SetPoint('TOPLEFT',62,-11);b.sub:Hide()end
-  if row.best then U.SetIcon(b.itemIcon,row.best.item.id);b.itemIcon:Show();b.bundle:SetText(row.best.item.quantity..' × '..A.ItemName(row.best.item.id,row.best.item.name))
+  if row.best then U.SetIcon(b.itemIcon,row.best.item.id);b.itemIcon:Show();U.ItemText(b.bundle,row.best.item.id,row.best.item.quantity..' × '..A.ItemName(row.best.item.id,row.best.item.name))
   else b.itemIcon:Hide();b.bundle:SetText('No priced filling bundle')end
-  b.favor:SetText(row.crate.favor or '?');b.upfront:SetText(A.Money(row.gross));b.net:SetText(row.net and A.Money(row.net)or '—')
-  b.ratio:SetText(row.ratio and string.format('%.1fc per Favor',math.floor(row.ratio*10+0.5)/10)or 'Not ranked')
+  b.favor:SetText(row.crate.favor or '?');b.upfront:SetText(U.Money(row.gross));b.net:SetText(row.net and U.Money(row.net)or '—')
+  b.ratio:SetText(row.ratio and string.format('%.1f|cffeda55fc|r per Favor',math.floor(row.ratio*10+0.5)/10)or 'Not ranked')
   U.ItemTooltip(b,row.crate.id,row.price,row.reason or 'Click to compare filling options')
   if selectedID==row.crate.id then selected=row end
  end
@@ -67,9 +66,10 @@ end
 local function create()
  frame=CreateFrame('Frame','WaylaidValueFrame',UIParent,'BackdropTemplate');frame:SetSize(900,730);frame:SetPoint('CENTER');frame:SetFrameStrata('DIALOG');frame:SetClampedToScreen(true)
  frame:SetMovable(true);frame:EnableMouse(true);frame:RegisterForDrag('LeftButton');frame:SetScript('OnDragStart',frame.StartMoving);frame:SetScript('OnDragStop',frame.StopMovingOrSizing)
- frame:SetBackdrop({bgFile='Interface\\Buttons\\WHITE8X8',edgeFile='Interface\\Buttons\\WHITE8X8',edgeSize=1});frame:SetBackdropColor(0.106,0.129,0.145,1);frame:SetBackdropBorderColor(0.46,0.38,0.25,1)
+ U.Skin(frame,{0.065,0.058,0.048,0.98},{0.50,0.40,0.25,0.95})
+ U.Fill(frame,4,-4,892,46,{0.10,0.078,0.045,1})
  frame:SetScale(math.min(1,(UIParent:GetWidth()-24)/900,(UIParent:GetHeight()-24)/730))
- U.Icon(frame,20,-15,248682);U.Text(frame,52,-17,430,'Waylaid Value','GameFontNormalLarge',U.gold);U.Text(frame,540,-22,42,'Prices',nil,U.muted)
+ U.Icon(frame,20,-10,248682,32);U.Text(frame,62,-17,420,'Waylaid Value','GameFontNormalLarge',U.gold,nil,18);U.Text(frame,540,-22,42,'Prices',nil,U.muted)
  local function chooseSource()
   if UIDropDownMenu_Initialize and UIDropDownMenu_CreateInfo and UIDropDownMenu_AddButton and ToggleDropDownMenu then
    if not frame.sourceMenu then frame.sourceMenu=CreateFrame('Frame','WaylaidValueSourceMenu',frame,'UIDropDownMenuTemplate')end
@@ -102,7 +102,8 @@ local function create()
   GameTooltip:SetOwner(self,'ANCHOR_TOP');GameTooltip:AddLine('Cached auction prices',0.87,0.76,0.49)
   GameTooltip:AddLine("Refresh recalculates the selected addon's cache, not a new AH scan. TSM's public price API does not expose the AH timestamp.",1,1,1,true)
   GameTooltip:AddLine('Auto uses TSM first and Auctionator for missing items. Item tooltips identify their price source.',1,1,1,true)
-  GameTooltip:AddLine('Unit price × quantity is an estimate; stock and stack costs are unverified. Net subtracts documented turn-in silver. No first-turn-in or random bonus.',1,1,1,true);GameTooltip:Show()
+  GameTooltip:AddLine('Net = upfront minus turn-in money. The model assumes 50 copper per Favor: 20 Favor returns 10 silver. Other tiers still need field confirmation. No first-turn-in or random bonus.',1,1,1,true)
+  GameTooltip:AddLine('Unit price × quantity is an estimate; stock and stack costs are unverified.',1,1,1,true);GameTooltip:Show()
  end);about:SetScript('OnLeave',function()GameTooltip:Hide()end)
  UISpecialFrames[#UISpecialFrames+1]='WaylaidValueFrame';frame:SetScript('OnShow',A.Refresh);frame:Hide()
 end

@@ -34,7 +34,7 @@ See the cheapest priced filling bundle for each crate, the Favor it gives, the t
 
 ### Rewards
 
-Start with your character's professions, or browse other professions. Combine search, armor type, level/class and crafting-skill filters. Select a reward to see its recipe Favor cost, an exact whole-crate shopping plan, crafting materials and estimated total gold. Enter Favor already held or mark an already learned recipe to remove costs you no longer need to pay.
+Start with your character's professions, or browse other professions. Combine search, armor type, level/class, role relevance and crafting-skill filters. For my class keeps physical DPS/general supplies for hunters and leaves unclassified items visible; All roles restores the wider list. Select a reward to see its recipe Favor cost, an exact whole-crate shopping plan, crafting materials and estimated total gold. Enter Favor already held or mark an already learned recipe to remove costs you no longer need to pay. Item names/icons follow rarity and money units use gold/silver/copper colors.
 
 ### Prices
 

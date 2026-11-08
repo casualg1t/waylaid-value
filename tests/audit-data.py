@@ -38,7 +38,7 @@ for _,r in ipairs(A.Rewards)do local c=A.CostReward(r,read,rows,%d,%s);print(c.t
   assert len(actual)==len(expected)==321
   for a,b in zip(actual,expected):assert [None if x=='nil' else float(x) for x in a]==b,(a,b)
 folder=Path('addon/WaylaidValue');toc=(folder/'WaylaidValue.toc').read_text();version=re.search(r'^## Version: (.+)$',toc,re.M)[1]
-expected={line.strip() for line in toc.splitlines() if line.strip()and not line.startswith('#')}|{'WaylaidValue.toc','README.md','THIRD_PARTY_LICENSES.txt','LICENSE'}
+expected={line.strip() for line in toc.splitlines() if line.strip()and not line.startswith('#')}|{'WaylaidValue.toc','README.md','THIRD_PARTY_LICENSES.txt','LICENSE','SkinFill.tga','SkinRing.tga'}
 with zipfile.ZipFile(f'outputs/WaylaidValue-{version}.zip')as z:
  assert z.testzip()is None
  assert set(z.namelist())=={'WaylaidValue/'+p for p in expected}

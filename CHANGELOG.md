@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.0
+
+- Color reward, crate and material names/icons by item rarity.
+- Format gold, silver and copper units consistently; remove zero denominations from displayed money.
+- Add separate class/role relevance filters for physical DPS, spell DPS, healing, tanking and general use.
+- Keep uncertain roles visible under class relevance, and distinguish equip permission from role affinity.
+- Refine the existing layout with a warm dark palette, original rounded skin assets, framed tabs and compact reward rows.
+- Label the turn-in money deduction explicitly. A 20-Favor/10-silver field observation matches the existing math.
+- Keep TSM age uncertainty in About these prices; no invented timestamp is shown.
+
 ## 0.4.1
 
 - Correct minimap drag angles under Lua 5.1.
