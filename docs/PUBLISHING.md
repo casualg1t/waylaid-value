@@ -52,4 +52,4 @@ CurseForge is a separate submission. Do not claim it is published until the proj
 
 The first CurseForge file is registered as file 9514517, Release, Forever 1.60.1, with automatic publication after approval selected. Source link saved to GitHub. Public listing is https://www.curseforge.com/wow/addons/waylaid-value; until approved it may be unavailable to other accounts.
 
-The CurseForge CDN ZIP was downloaded and verified byte-for-byte against the public GitHub ZIP. The console still displayed `Uploading` after the file was available; processing/moderation approval was not observed. Both real screenshots were uploaded to the gallery, captioned and saved. Do not re-upload merely because the status has not advanced.
+The CurseForge CDN ZIP was downloaded and verified byte-for-byte against the public GitHub ZIP. The console advanced to `Processing`; moderation approval was not observed. Both real screenshots were uploaded to the gallery, captioned and saved. Do not re-upload merely because the status has not advanced.
