@@ -9,23 +9,20 @@ function A.BuildRewardsView(window)
  local icons={Alchemy='Trade_Alchemy',Blacksmithing='Trade_BlackSmithing',Cooking='INV_Misc_Food_15',Enchanting='Trade_Engraving',Engineering='Trade_Engineering',Leatherworking='Trade_LeatherWorking',Tailoring='Trade_Tailoring'}
  local others=false
  U.Fill(p,140,0,1,590,U.line,'BORDER')
- p.search=U.Edit(p,156,0,200,'Find a reward')
- p.armor=U.Button(p,368,0,126,'All armor types',function()end)
+ p.search=U.Edit(p,156,0,200,'Find a reward','Find a reward','Search item names and professions in the selected group. Search combines with the armor, role and requirement filters. Clear the text to restore other matches.')
+ p.armor=U.Button(p,368,0,126,'All armor types',function()end,'Armor type','Restrict the list to cloth, leather, mail or plate. All armor types removes this restriction and includes non-armor rewards. My level / class still checks whether your character can use the item.')
  p.role=U.Button(p,506,0,172,'For my class',function()end)
  local function check(x,w,label,reason)
-  local b=CreateFrame('CheckButton',nil,p,'UICheckButtonTemplate');b:SetPoint('TOPLEFT',x,-34);b:SetSize(w,28)
-  -- Keep the native check art square while making the full label clickable.
-  for _,get in ipairs({'GetNormalTexture','GetPushedTexture','GetHighlightTexture','GetCheckedTexture'})do
-   if b[get]then local t=b[get](b);if t then t:ClearAllPoints();t:SetPoint('LEFT',0,0);t:SetSize(22,22)end end
-  end
-  U.Text(b,24,-9,w-24,label,nil,U.muted);b:SetChecked(true)
-  U.ItemTooltip(b,nil,nil,reason);return b
+  local b=U.Check(p,x,-34,w,label,label,reason);b:SetChecked(true);return b
  end
  p.usable=check(156,150,'My level / class','Checks whether your character can use the item. Role relevance is a separate filter. Weapon training and reputation are not checked. Unverified requirements are hidden while this filter is on.')
  p.skill=check(320,180,'Within my skill','Match your learned profession and current crafting skill. Recipe ownership is not checked. Unverified skill requirements are hidden while this filter is on.')
  local count=U.Text(p,156,-74,132,'',nil,U.muted);p.count=count
- U.Text(p,296,-74,84,'Craft',nil,U.muted,'RIGHT')
+ local craftHeader=U.Text(p,296,-74,84,'Craft',nil,U.muted,'RIGHT')
+ U.HintText(p,craftHeader,'Craft cost','Material cost for one craft, excluding the recipe unlock. Some crafts produce several items; this is not a per-output-item price. Price missing means a reagent quote or crafting fact is unavailable. A dash marks a direct reward that is not crafted.')
  p.hiddenCount=U.Text(p,426,-74,434,'',nil,U.muted,'RIGHT')
+ U.HintText(p,count,'Matching rewards','Number of rewards matching the selected profession, search and filters. Prices do not decide whether an item is shown.')
+ U.HintText(p,p.hiddenCount,'Hidden by filters','Items excluded by armor, role, level/class or crafting skill. Unverified means a required item/skill fact is missing. Broaden the filters or Browse all recipes to inspect more rewards; search and armor still apply.')
  local list,child=U.Scroll(p,156,-98,224,488)
  U.Fill(p,394,-98,1,492,U.line,'BORDER')
  local d=CreateFrame('Frame',nil,p);d:SetPoint('TOPLEFT',410,-98);d:SetSize(450,492);p.detail=d
@@ -33,12 +30,29 @@ function A.BuildRewardsView(window)
  d.inspect=CreateFrame('Button',nil,d);d.inspect:SetPoint('TOPLEFT',0,0);d.inspect:SetSize(450,44)
  d.meta=U.Text(d,44,-25,406,'',nil,U.muted)
  U.Text(d,0,-55,450,'Total net cost',nil,U.muted);d.total=U.Text(d,0,-74,450,'','GameFontNormalLarge',U.text,nil,24)
- U.Text(d,0,-112,140,'Recipe unlock',nil,U.muted);d.unlock=U.Text(d,0,-131,140,'')
+ d.unlockLabel=U.Text(d,0,-112,140,'Recipe unlock',nil,U.muted);d.unlock=U.Text(d,0,-131,140,'')
  U.Text(d,150,-112,280,'Materials · one craft',nil,U.muted);d.materials=U.Text(d,150,-131,280,'')
  U.Fill(d,0,-155,450,1,U.line,'BORDER')
- U.Text(d,0,-175,66,'Favor held',nil,U.muted);p.held=U.Edit(d,66,-167,50);p.held:SetNumeric(true);p.held:SetText('0')
- p.learned=CreateFrame('CheckButton',nil,d,'UICheckButtonTemplate');p.learned:SetPoint('TOPLEFT',270,-167);p.learned:SetSize(22,22)
- U.Text(d,296,-175,154,'Recipe already learned',nil,U.muted)
+ local heldHelp='Enter the Merchant\'s Favor you already have. It reduces the Favor still needed for the selected recipe or purchase. This amount is entered manually.'
+ local function heldBody()return p.current and heldHelp or 'Select a reward before entering your current Favor balance.'end
+ local function learnedBody()
+  if not p.current then return 'Select a recipe first.'end
+  if p.current.reward.purchase then return 'This is a direct Favor purchase, not a recipe. There is no learned-recipe unlock to remove.'end
+  return 'Check this if you already know the selected recipe. Its one-time Favor unlock becomes zero; the cost of one craft\'s materials remains. Changing to another recipe clears this choice.'
+ end
+ local heldLabel=U.Text(d,0,-175,66,'Favor held',nil,U.muted);U.HintText(d,heldLabel,'Favor held',heldBody)
+ p.held=U.Edit(d,66,-167,50,nil,'Favor held',heldBody);p.held:SetNumeric(true);p.held:SetText('0')
+ p.learned=U.Check(d,270,-167,180,'Recipe already learned','Recipe already learned',learnedBody)
+ -- Disabled widgets do not deliver hover on every client; show help-only hit areas then.
+ p.heldDisabledHelp=U.Hint(d,66,-167,50,28,'Favor held',heldBody);p.heldDisabledHelp:Hide()
+ p.learnedDisabledHelp=U.Hint(d,270,-167,180,28,'Recipe already learned',learnedBody);p.learnedDisabledHelp:Hide()
+ d.totalHelp=U.Hint(d,0,-55,450,45,'Total net cost',function()
+  if not p.current then return 'Select a reward to see its estimated recipe unlock and one-craft cost.'end
+  local r=p.current
+  return 'Remaining one-time Favor unlock, minus crate turn-in money, plus materials for one craft. Held Favor and Recipe already learned change the unlock only.\n\n'..(r.total and ('Estimated total: '..U.Money(r.total)..'.')or('Incomplete: '..(r.reason or 'A material quote or crafting fact is missing.')..' Check the details and update your price addon, then Refresh.'))
+ end)
+ U.Hint(d,0,-112,140,38,'Favor unlock cost','Estimated net gold to earn the remaining Favor with whole crates. It subtracts turn-in money and accounts for Favor held / Recipe already learned. Only documented crate tiers enter this plan. A direct reward uses its purchase Favor cost instead.')
+ U.Hint(d,150,-112,280,38,'Materials for one craft','Required reagent quantities × cached unit buyout prices. Recipe unlock is separate. This is per craft, not necessarily per output item; owned materials and vendor alternatives are not deducted.')
  local scroll,detail=U.Scroll(d,0,-207,430,275)
  p.listRows=listRows;p.detailRows=detailRows;p.detailScroll=scroll
  local function draw(lines,reset)
@@ -62,12 +76,15 @@ function A.BuildRewardsView(window)
    elseif line.kind=='section'then
     height=32;b.label:Show();b.label:SetWidth(195);b.label:SetTextColor((unpack or table.unpack)(U.gold));b.label:SetText(line.text)
     b.info:Show();b.info:SetText(line.info or '');b.line:Show()
+    U.Help(b,line.text,line.text=='Crafting materials'and 'Materials needed for one craft. Quantities are priced at cached buyouts; owned inventory and output yields are not applied.'or 'An exact whole-crate plan for the remaining Favor. Buy each listed crate and its filling bundle, then turn them in manually. Extra Favor from whole crates is shown as left over. Quotes do not guarantee stock.')
    elseif line.kind=='total'then
     height=34;b.label:Show();b.label:SetWidth(310);b.label:SetTextColor((unpack or table.unpack)(U.muted));b.label:SetText(line.text)
     b.amount:Show();b.amount:SetText(line.total and U.Money(line.total)or 'Incomplete');b.line:Show()
+    U.Help(b,'Gold needed upfront','Total gold needed to buy the crate plan and crafting materials before collecting turn-in money. This is higher than net cost because the turn-in money is received later.')
    else
     b.label:Show();b.label:SetWidth(430);b.label:SetTextColor((unpack or table.unpack)(U.muted));b.label:SetText(line.text)
     b.label:SetWordWrap(true);b.label:SetHeight(36);height=42
+    U.Help(b,line.kind=='message'and 'Why this estimate is incomplete'or 'Estimate details',line.text)
    end
    if line.kind~='note'and line.kind~='message'then b.label:SetWordWrap(false);b.label:SetHeight(16)end
    b:SetHeight(height);y=y+height
@@ -78,12 +95,13 @@ function A.BuildRewardsView(window)
  local function show()
   for _,b in ipairs(listRows)do b.selection:SetShown(b.reward==selected)end
   if not selected then
-   p.current=nil;d.inspect:Hide();d.icon:Hide();d.title:SetText('No matching rewards');d.title:SetTextColor((unpack or table.unpack)(U.text));d.meta:SetText('Change the role, filters or profession.')
-   d.unlock:SetText('—');d.materials:SetText('—');d.total:SetText('—');p.learned:Disable();p.held:Disable();draw({},true);return
+   p.current=nil;d.inspect:Hide();d.icon:Hide();d.title:SetText('No matching rewards');d.title:SetTextColor((unpack or table.unpack)(U.text));d.meta:SetText('Change the role, filters or profession.');d.unlockLabel:SetText('Recipe unlock')
+   d.unlock:SetText('—');d.materials:SetText('—');d.total:SetText('—');p.learned:Disable();p.held:Disable();p.learnedDisabledHelp:Show();p.heldDisabledHelp:Show();draw({},true);return
   end
-  d.icon:Show();U.SetIcon(d.icon,selected.id);p.learned:SetEnabled(not selected.purchase);p.held:Enable()
+  d.icon:Show();U.SetIcon(d.icon,selected.id);p.learned:SetEnabled(not selected.purchase);p.held:Enable();p.learnedDisabledHelp:SetShown(selected.purchase==true);p.heldDisabledHelp:Hide()
   d.inspect:Show();U.RewardTooltip(d.inspect,selected)
   local r=A.CostReward(selected,read,p.crateRows,p.held:GetText(),p.learned:GetChecked())
+  d.unlockLabel:SetText(selected.purchase and 'Favor purchase'or 'Recipe unlock')
   U.ItemText(d.title,selected.id,selected.name)
   local requirements=A.RewardRequirements(selected)
   local _,roleLabel=A.RewardRoles(selected)
@@ -177,14 +195,25 @@ function A.BuildRewardsView(window)
    b.small:SetText(small or '');b.small:SetShown(small~=nil);b.icon:SetShown(icon~=nil)
    if icon then b.icon:SetTexture('Interface\\Icons\\'..icon)end
    b:SetScript('OnClick',click or function()p:ChooseProfession(key)end);y=y+38
+   U.Help(b,label,function()
+    if key=='mine'then return 'Show your learned professions. Enables My level / class, Within my skill and For my class. Existing search and armor filters still apply.'
+    elseif key=='all'then return 'Browse the whole reward catalogue, including direct purchases. Turns off level/class, skill and role restrictions. Existing search and armor filters still apply.'
+    elseif key=='others'then return (others and 'Collapse'or 'Expand')..' professions outside Your professions. Selecting an unlearned profession turns off Within my skill so its recipes can be inspected.'
+    elseif key=='Other rewards'then return 'Direct Favor purchases, certificates and other non-recipe rewards. Direct purchases have no crafting material quote.'
+    elseif key=='Unverified craft data'then return 'Rewards with incomplete crafting data. You can inspect them, but unavailable material facts are not guessed and a complete total may be impossible.'end
+    local rank=profile.professions[key]
+    return 'Show '..key..' rewards. '..(rank and ('Your skill: '..rank.skill..'.')or(profile.professionsKnown and 'Profession not learned; selecting it turns off Within my skill.'or 'Your profession status is unverified.'))..' Search, armor and role filters still apply.'
+   end)
   end
   button('mine','My professions')
   if not p.professionLabel then p.professionLabel=U.Text(p,4,-52,128,'',nil,U.muted)end
+  if not p.professionLabel.wvHelpHit then U.HintText(p,p.professionLabel,'Your professions',function()return profile.professionsKnown and 'Crafting professions detected on your current character. Each entry shows its current skill rank.'or 'Your professions could not be read completely yet. Try Refresh, or use Browse all recipes while the character data becomes available.'end)end
   p.professionLabel:SetText(profile.professionsKnown and 'Your professions'or 'Professions unavailable');y=72
   local own=0
   for _,name in ipairs(order)do local rank=profile.professions[name];if rank then own=own+1;button(name,name,'Skill '..rank.skill,icons[name])end end
   if not p.noProfessions then p.noProfessions=U.Text(p,4,-76,124,'No professions learned',nil,U.muted)end
-  p.noProfessions:SetShown(own==0 and profile.professionsKnown);if own==0 then y=y+26 end
+  if not p.noProfessions.wvHelpHit then U.HintText(p,p.noProfessions,'No crafting profession detected','No supported crafting profession is currently detected. Browse all recipes to inspect other professions, or Refresh after learning one.')end
+  p.noProfessions:SetShown(own==0 and profile.professionsKnown);p.noProfessions.wvHelpHit:SetShown(own==0 and profile.professionsKnown);if own==0 then y=y+26 end
   y=y+8
   button('others',(others and '− 'or '+ ')..'Other professions',nil,nil,function()others=not others;nav()end)
   if others then for _,name in ipairs(order)do if not profile.professions[name]then button(name,name,profile.professionsKnown and 'Not learned'or 'Unverified',icons[name])end end end
@@ -193,13 +222,21 @@ function A.BuildRewardsView(window)
  end
  local roleKeys={'auto','all','physical','caster','healing','tank','general'}
  local roleLabels={'For my class','All roles','Physical DPS','Spell DPS','Healing','Tank','General'}
- U.ItemTooltip(p.role,nil,nil,'Role relevance is separate from whether you can equip or use an item. For my class keeps physical DPS, general supplies and unclassified items for hunters. Hybrid classes can choose a role explicitly. Exact role filters show classified matches. Restoring your own health is general use, not a healer role.')
+ local roleHelp={
+  auto='Use class relevance. Hunters keep physical DPS, general supplies and unclassified items. Hybrid classes can choose a role manually.',
+  all='Remove the role restriction, including unclassified items. Profession, armor and requirement filters still apply.',
+  physical='Items with physical attack stats. This is a role affinity, not a talent-weighted upgrade score.',
+  caster='Items with spell-damage stats. Shared damage/healing gear can appear under both Spell DPS and Healing.',
+  healing='Items with healing-power stats. Self-healing supplies are general use, not healer equipment.',
+  tank='Items with explicit defensive stats or bonus armor. This is not an upgrade ranking.',
+  general='General supplies, utility items and other classified non-specialist rewards, including usable engineering bombs.'}
+ U.Help(p.role,'Role relevance',function()return (roleHelp[p.options.role]or '')..'\n\nSeparate from whether you can equip/use an item. Choose All roles to browse more items; exact role filters need a classified match.'end)
  p.role:SetScript('OnClick',function(self)
   local function choose(i)p.options.role=roleKeys[i];self:SetText(roleLabels[i]);filter(true)end
   if UIDropDownMenu_Initialize and UIDropDownMenu_CreateInfo and UIDropDownMenu_AddButton and ToggleDropDownMenu then
    if not p.roleMenu then p.roleMenu=CreateFrame('Frame',nil,p,'UIDropDownMenuTemplate')end
    UIDropDownMenu_Initialize(p.roleMenu,function()for i,label in ipairs(roleLabels)do
-    local index=i;local info=UIDropDownMenu_CreateInfo();info.text=label;info.checked=p.options.role==roleKeys[i];info.func=function()choose(index)end;UIDropDownMenu_AddButton(info)
+    local index=i;local info=UIDropDownMenu_CreateInfo();info.text=label;info.checked=p.options.role==roleKeys[i];info.func=function()choose(index)end;info.tooltipTitle=label;info.tooltipText=roleHelp[roleKeys[i]];info.tooltipOnButton=true;UIDropDownMenu_AddButton(info)
    end end);ToggleDropDownMenu(1,nil,p.roleMenu,self,0,0)
   else
    local index=1;for i,key in ipairs(roleKeys)do if p.options.role==key then index=i;break end end
@@ -212,7 +249,8 @@ function A.BuildRewardsView(window)
   if UIDropDownMenu_Initialize and UIDropDownMenu_CreateInfo and UIDropDownMenu_AddButton and ToggleDropDownMenu then
    if not p.armorMenu then p.armorMenu=CreateFrame('Frame',nil,p,'UIDropDownMenuTemplate')end
    UIDropDownMenu_Initialize(p.armorMenu,function()for i,label in ipairs(labels)do
-    local index=i;local info=UIDropDownMenu_CreateInfo();info.text=label;info.checked=(p.options.armor or 0)==i-1;info.func=function()choose(index)end;UIDropDownMenu_AddButton(info)
+    local index=i;local info=UIDropDownMenu_CreateInfo();info.text=label;info.checked=(p.options.armor or 0)==i-1;info.func=function()choose(index)end
+    info.tooltipTitle=label;info.tooltipText=i==1 and 'Show all armor types and non-armor rewards, subject to the other filters.'or('Show '..string.lower(label)..' items only. Level/class and role filters still apply.');info.tooltipOnButton=true;UIDropDownMenu_AddButton(info)
    end end);ToggleDropDownMenu(1,nil,p.armorMenu,self,0,0)
   else choose(((p.options.armor or 0)+1)%5+1)end
  end)

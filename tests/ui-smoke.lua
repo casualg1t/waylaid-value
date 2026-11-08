@@ -11,6 +11,10 @@ new=function(kind,name,parent)
   return o
 end
 function methods:SetScript(event,fn)self.scripts[event]=fn end
+function methods:HookScript(event,fn)local prior=self.scripts[event];self.scripts[event]=function(self,...)if prior then prior(self,...)end;fn(self,...)end end
+function methods:SetMotionScriptsWhileDisabled(on)self.motionWhileDisabled=on end
+function methods:SetOwner(owner)self.owner=owner end
+function methods:IsOwned(owner)return self.owner==owner end
 function methods:CreateFontString()return new("FontString",nil,self)end
 function methods:CreateTexture()return new("Texture",nil,self)end
 function methods:SetText(value)self.value=tostring(value or "")end
@@ -130,6 +134,7 @@ GetProfessions=function()return 1,nil,nil,4 end
 GetProfessionInfo=function(i)if i==1 then return 'Engineering',nil,skill,150,nil,nil,202 else return 'Cooking',nil,2,75,nil,nil,185 end end
 rewards:Refresh();rewards.navButtons.mine.scripts.OnClick()
 assert(rewards.options.usable and rewards.options.skill and rewards.visibleCount==5)
+assert(not rewards.noProfessions.wvHelpHit:IsShown())
 for _,entry in ipairs(rewards.visible)do assert(entry.skilled and entry.usable and rewards.profile.professions[entry.reward.profession])end
 assert(rewards.navButtons.Engineering:IsShown()and (not rewards.navButtons.Alchemy or not rewards.navButtons.Alchemy:IsShown()))
 rewards.navButtons.others.scripts.OnClick();assert(rewards.navButtons.Alchemy:IsShown())
@@ -273,3 +278,42 @@ fixture[8845]=7000
 local purchase;for _,reward in ipairs(A.Rewards)do if reward.purchase then purchase=reward;break end end
 v.search:SetText(purchase.name);v:Refresh();assert(v.listRows[1].craft:GetText()=='—')
 print('PASS: compact row craft quotes, refresh updates, held/learned independence, missing prices and direct rewards.')
+-- Every clickable addon control and every menu choice supplies explanatory help.
+local function inWindow(o)while o do if o==frame or o==A.minimapButton then return true end;o=o.parent end end
+local buttons=0
+for _,o in ipairs(objects)do
+ if (o.kind=='Button'or o.kind=='CheckButton')and o.scripts.OnClick and inWindow(o)then
+  assert(o.scripts.OnEnter and o.scripts.OnLeave and o.wvTooltipKind,'Clickable control without tooltip');buttons=buttons+1
+ end
+end
+assert(buttons>20)
+local lines={};GameTooltip.AddLine=function(_,line)lines[#lines+1]=line end
+local function helpText(control)lines={};control.scripts.OnEnter(control);return table.concat(lines,' ')end
+for _,o in ipairs(objects)do if o.wvTooltipKind=='help'and inWindow(o)then assert(#helpText(o)>10,'Empty explanatory tooltip')end end
+local expertText=helpText(frame.expert)
+assert(expertText:find('level%-20%+')and expertText:find('15 or 30')and expertText:find('unconfirmed')and expertText:find('documented tiers only'))
+assert(frame.expert:GetWidth()==248 and frame.expert.motionWhileDisabled)
+assert(v.noProfessions:IsShown()==v.noProfessions.wvHelpHit:IsShown())
+assert(helpText(frame.refresh):find('does not scan')and helpText(frame.source):find('TSM'))
+assert(helpText(v.learnedDisabledHelp):find('direct Favor purchase'))
+assert(v.learnedDisabledHelp:IsShown()and v.learned.enabled==false)
+v.search:SetText('not a real reward');v.search.scripts.OnTextChanged()
+assert(helpText(v.heldDisabledHelp):find('Select a reward')and helpText(v.learnedDisabledHelp):find('Select a recipe'))
+assert(v.heldDisabledHelp:IsShown()and v.learnedDisabledHelp:IsShown())
+v.search:SetText('Caustic Smog Potion');v:Refresh()
+assert(not v.learnedDisabledHelp:IsShown()and not v.heldDisabledHelp:IsShown())
+local menu={};UIDropDownMenu_Initialize=function(_,fn)menu={};fn()end
+UIDropDownMenu_CreateInfo=function()return{}end;UIDropDownMenu_AddButton=function(info)menu[#menu+1]=info end;ToggleDropDownMenu=function()end
+for _,control in ipairs({frame.source,v.role,v.armor})do
+ control.scripts.OnClick(control);assert(#menu>2)
+ for _,info in ipairs(menu)do assert(info.tooltipTitle and #info.tooltipText>20 and info.tooltipOnButton)end
+end
+-- Header help does not turn clicking a row price into a dead area.
+local priceHelp=frame.listRows[2].upfront.wvHelpHit
+priceHelp.scripts.OnClick(priceHelp);assert(frame.detail.title:GetText():match('Journeyman Parts'))
+-- Refreshes reuse help frames; an unrelated tooltip is not hidden by another control.
+local objectCount=#objects;v:Refresh();v:Refresh();assert(#objects==objectCount)
+helpText(frame.refresh);frame.source:Hide();assert(GameTooltip:IsShown())
+frame.refresh:Hide();assert(not GameTooltip:IsShown());frame.refresh:Show();frame.source:Show()
+assert(A.minimapButton.scripts.OnHide) -- help hooks preserve the drag-stop handler tested above
+print('PASS: all clickable addon controls and menu choices have help; Expert meaning, disabled reasons, row click forwarding, reuse and tooltip ownership.')

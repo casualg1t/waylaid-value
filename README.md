@@ -2,7 +2,7 @@
 
 Compare the gold cost of Waylaid Crates and plan Merchant's Favor recipe unlocks in **World of Warcraft: Forever**.
 
-Version **0.5.1** · Interface **16001** · MIT license
+Version **0.5.2** · Interface **16001** · MIT license
 
 ## What it does
 
@@ -38,6 +38,8 @@ The catalogue contains 30 crates, 96 filling bundles and 321 assembled rewards. 
 Item names and icon borders use the item's rarity, with live-client quality taking precedence over the retained fallback. Currency units use gold/silver/copper colors consistently. The warm rounded controls, framed tabs and reward rows follow the OneForAll design reference while retaining this addon's existing window and tabs. The small skin textures are independently generated project assets; no OneForAll UI source or artwork is included.
 
 The compact reward list shows a full-width item name, Favor price and **Craft** material cost on each row. Craft means one craft's reagents only, excluding the recipe unlock; it does not change with held Favor or the learned-recipe input. Roles remain in the item tooltip and selected detail. A `!` flags a blocked/unverified requirement when browsing outside the active requirement filters. Missing quotes say **Price missing**; direct rewards show a dash because they are not crafted.
+
+Hover controls and menu choices for explanations: tabs, price source, Refresh, filters, professions, held Favor, recipe ownership, cost headings, totals and status messages. Disabled inputs explain how to enable them or why they do not apply. Expert rewards explains the level-20+ crate tier, its unconfirmed 15/30-Favor estimates, and why it is opt-in; reward-shopping plans continue to use documented tiers only. Checkboxes can be hovered/clicked across their labels. Item/effect tooltips remain available on item rows.
 
 The level/class filter checks the finished item, including item-use profession requirements. The skill filter checks the recipe's profession rank. They do not confirm trained weapon proficiency, reputation or recipe ownership. Enter your **Favor held** and check **Recipe already learned** when applicable. Total estimated net cost includes the remaining unlock and one craft, not necessarily one output item.
 

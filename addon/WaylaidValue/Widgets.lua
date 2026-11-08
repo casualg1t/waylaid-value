@@ -72,16 +72,53 @@ function A.ItemName(id,fallback)
  if id and id>0 and not requested[id]and C_Item and C_Item.RequestLoadItemDataByID then requested[id]=true;C_Item.RequestLoadItemDataByID(id)end
  return fallback or(A.ItemNames and A.ItemNames[id])or 'Loading item name…'
 end
+local function hideHelp(self)
+ if not GameTooltip.IsOwned or GameTooltip:IsOwned(self)then GameTooltip:Hide()end
+end
+local function tooltipEvents(b,enter)
+ b:SetScript('OnEnter',enter);b:SetScript('OnLeave',hideHelp)
+ if b.SetMotionScriptsWhileDisabled then b:SetMotionScriptsWhileDisabled(true)end
+ if b.HookScript and not b.wvHelpHideHook then b:HookScript('OnHide',hideHelp);b.wvHelpHideHook=true end
+end
+function U.ShowHelp(self)
+ local title,body=self.wvHelpTitle,self.wvHelpBody
+ if type(title)=='function'then title=title(self)end
+ if type(body)=='function'then body=body(self)end
+ GameTooltip:SetOwner(self,'ANCHOR_RIGHT');if GameTooltip.ClearLines then GameTooltip:ClearLines()end
+ GameTooltip:AddLine(title or '',unpack(U.gold))
+ if type(body)=='table'then for _,line in ipairs(body)do GameTooltip:AddLine(line,U.text[1],U.text[2],U.text[3],true)end
+ elseif body then GameTooltip:AddLine(body,U.text[1],U.text[2],U.text[3],true)end
+ GameTooltip:Show()
+end
+function U.Help(b,title,body)
+ b.wvHelpTitle=title;b.wvHelpBody=body;b.wvTooltipKind='help';tooltipEvents(b,U.ShowHelp);return b
+end
+function U.Hint(p,x,y,w,h,title,body,click)
+ local f=CreateFrame(click and 'Button'or 'Frame',nil,p);f:SetPoint('TOPLEFT',x,y);f:SetSize(w,h);f:EnableMouse(true)
+ if click then f:SetScript('OnClick',click)end
+ return U.Help(f,title,body)
+end
+function U.HintText(p,text,title,body,click)
+ local f=CreateFrame(click and 'Button'or 'Frame',nil,p);f:SetAllPoints(text);f:EnableMouse(true)
+ if click then f:SetScript('OnClick',click)end
+ text.wvHelpHit=U.Help(f,title,body);return f
+end
+function U.Check(p,x,y,w,label,title,body)
+ local b=CreateFrame('CheckButton',nil,p,'UICheckButtonTemplate');b:SetPoint('TOPLEFT',x,y);b:SetSize(w,28)
+ for _,get in ipairs({'GetNormalTexture','GetPushedTexture','GetHighlightTexture','GetCheckedTexture','GetDisabledCheckedTexture'})do
+  if b[get]then local t=b[get](b);if t then t:ClearAllPoints();t:SetPoint('LEFT',0,0);t:SetSize(22,22)end end
+ end
+ U.Text(b,26,-8,w-26,label,nil,U.muted);return U.Help(b,title or label,body)
+end
 function U.ItemTooltip(b,id,price,extra)
- b:SetScript('OnEnter',function(self)
+ b.wvTooltipKind='item';tooltipEvents(b,function(self)
   GameTooltip:SetOwner(self,'ANCHOR_RIGHT');if GameTooltip.ClearLines then GameTooltip:ClearLines()end;if id and id>0 then GameTooltip:SetItemByID(id)end
   if price then GameTooltip:AddLine(U.Money(price.value)..' each · '..price.source,0.75,0.75,0.70,true);if price.age then GameTooltip:AddLine('Price age: '..price.age..' day(s)',0.75,0.75,0.70)end end
   if extra then GameTooltip:AddLine(extra,0.87,0.76,0.49,true)end;GameTooltip:Show()
  end)
- b:SetScript('OnLeave',function()GameTooltip:Hide()end)
 end
 function U.RewardTooltip(b,reward,craftCost)
- b:SetScript('OnEnter',function(self)
+ b.wvTooltipKind='reward';tooltipEvents(b,function(self)
   GameTooltip:SetOwner(self,'ANCHOR_RIGHT')
   if GameTooltip.ClearLines then GameTooltip:ClearLines()end
   local effect=reward.spell and reward.recipe==reward.id and reward.profession=='Enchanting'
@@ -106,31 +143,30 @@ function U.RewardTooltip(b,reward,craftCost)
   end
   GameTooltip:Show()
  end)
- b:SetScript('OnLeave',function()GameTooltip:Hide()end)
 end
-function U.Button(p,x,y,w,label,click)
+function U.Button(p,x,y,w,label,click,title,body)
  local b=CreateFrame('Button',nil,p,'BackdropTemplate');b:SetPoint('TOPLEFT',x,y);b:SetSize(w,28)
  U.Skin(b)
  local f=U.Text(b,5,-7,w-10,label,'GameFontNormal',U.text,'CENTER',12)
  function b:SetText(v)f:SetText(v)end;function b:GetText()return f:GetText()end
  local hover=b:CreateTexture(nil,'HIGHLIGHT');hover:SetAllPoints();hover:SetColorTexture(0.8,0.7,0.4,0.08)
- b:SetScript('OnClick',click);return b
+ b:SetScript('OnClick',click);if body then U.Help(b,title or label,body)end;return b
 end
-function U.Edit(p,x,y,w,placeholder)
+function U.Edit(p,x,y,w,placeholder,title,body)
  local b=CreateFrame('EditBox',nil,p,'BackdropTemplate');b:SetPoint('TOPLEFT',x,y);b:SetSize(w,28)
  U.Skin(b,{0.045,0.040,0.035,1},{0.39,0.32,0.22,0.85})
  b:SetFontObject('GameFontHighlightSmall');b:SetTextInsets(8,8,0,0);b:SetAutoFocus(false)
  b:SetScript('OnEscapePressed',function(self)self:ClearFocus()end);b:SetScript('OnEnterPressed',function(self)self:ClearFocus()end)
- if placeholder then b.hint=U.Text(b,8,-7,w-16,placeholder,nil,U.muted)end;return b
+ if placeholder then b.hint=U.Text(b,8,-7,w-16,placeholder,nil,U.muted)end;if body then U.Help(b,title or placeholder,body)end;return b
 end
-function U.Tab(p,x,label,click)
+function U.Tab(p,x,label,click,body)
  local b=CreateFrame('Button',nil,p);b:SetPoint('TOPLEFT',x,-57);b:SetSize(90,32)
  local f=U.Text(b,0,-9,90,label,'GameFontNormal',U.muted,'CENTER',12)
  function b:SetActive(on)
   U.Skin(b,on and {0.20,0.14,0.06,1}or {0.065,0.058,0.048,1},on and {0.80,0.60,0.25,1}or {0.36,0.29,0.19,0.8})
   f:SetTextColor(unpack(on and U.gold or U.muted))
  end
- b:SetScript('OnClick',click);return b
+ b:SetScript('OnClick',click);if body then U.Help(b,label,body)end;return b
 end
 function U.Scroll(p,x,y,w,h)
  local s=CreateFrame('ScrollFrame',nil,p,'UIPanelScrollFrameTemplate');s:SetPoint('TOPLEFT',x,y);s:SetSize(w,h)

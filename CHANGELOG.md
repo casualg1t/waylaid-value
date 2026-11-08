@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.2
+
+- Add explanatory tooltips to buttons, tabs, dropdown choices, inputs and profession navigation.
+- Explain Expert crate tiers, provisional 15/30-Favor estimates and their opt-in behavior.
+- Explain craft/unlock/net/upfront costs, filtering, missing data and price status on hover.
+- Keep disabled controls explainable and make checkbox labels part of their hit area.
+- Preserve row selection when clicking a price and hide owned tooltips when their controls disappear.
+
 ## 0.5.1
 
 - Tighten reward rows from 44px to 32px and give item names more room.

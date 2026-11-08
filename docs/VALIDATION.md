@@ -1,5 +1,11 @@
 # Validation
 
+## 0.5.2 explanatory hover help
+
+All clickable addon controls have help, including the minimap button and menu choices. A callback audit checks every clickable Button/CheckButton under the addon and evaluates the explanatory help bodies. Tests check Expert meaning/15-or-30 estimates, dynamic provider status, disabled direct-purchase/empty-selection reasons, price-cell click forwarding, help-frame reuse and tooltip ownership. Existing minimap OnHide drag handling is preserved. Disabled-control hit areas hide when inputs are enabled, and the hidden no-professions message does not leave a hover area over profession navigation.
+
+Menu fields are supported by the retained Blizzard FrameXML interface (`tooltipTitle`, `tooltipText`, `tooltipOnButton`): https://raw.githubusercontent.com/tekkub/wow-ui-source/live/FrameXML/UIDropDownMenu.lua. This source reference and mocked callbacks do not prove popup positioning or every hover transition in the actual Forever client; those remain field checks.
+
 ## 0.5.1 compact craft quotes
 
 Reward rows are 32px high at a 34px pitch, with 184px-wide item names. The second line retains Favor and adds right-aligned one-craft material cost. Roles remain available in native tooltips and selected detail. A shared material-cost calculation supplies both the row quote and selected cost breakdown without planning Favor for every row.
