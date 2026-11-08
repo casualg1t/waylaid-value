@@ -8,7 +8,7 @@ commands = [
     [sys.executable, 'tools/build_rewards_html.py'],
     [sys.executable, 'tools/build_ui_preview.py'],
     [sys.executable, 'tools/package_addon.py'],
-    *[[lua, 'tests/' + name + '.lua'] for name in ['run', 'rewards', 'eligibility', 'ui-smoke']],
+    *[[lua, 'tests/' + name + '.lua'] for name in ['run', 'rewards', 'eligibility', 'scan', 'item-tooltips', 'ui-smoke']],
     ['node', 'tests/rewards-html.js'],
     ['node', 'tests/report-dom.js'],
     [sys.executable, 'tests/audit-data.py'],

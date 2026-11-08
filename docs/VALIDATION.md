@@ -1,5 +1,11 @@
 # Validation
 
+## 0.6.0 scanner / item-tooltip candidate
+
+New scanner tests drive real event/timer callbacks through localized-name search, exact ID matching, item/commodity ownership rules, pagination, rate-limit pauses, missing/unloaded data, competing searches, explicit stop, AH close, timeouts and market changes. Only complete scans replace a snapshot. Source-adapter tests verify explicit Scan mode, cached quotes, truthful timestamps and TSM/Auctionator priority. Item-tooltip tests exercise modern/legacy hooks, duplicate clearing, unknown item IDs, own-window suppression, Shift/compact/off modes and missing prices. UI callback checks exercise scan/stop commands, selected reward reagent scope and bag-hint settings.
+
+The proposed native Settings panel and Scan AH header button await design approval and have not been implemented. Real AH request handling, search restrictions, server event timing and native item-tooltip rendering remain unverified in Forever. No stable/public release of this candidate is claimed.
+
 ## 0.5.4 filling-material reminders
 
 Callback regressions cover partial and excess owned materials, selected-crate alternatives, live bag updates, missing APIs and hidden zero counts. Market totals, ranking and cheapest-bundle choices remain identical with inventory present. Counts describe one filling bundle, not an entire Rewards shopping plan. No inventory is deducted from quotes. Native rendering remains unverified.

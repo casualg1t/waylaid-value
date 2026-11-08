@@ -59,3 +59,15 @@ for _,bad in ipairs({-1,0/0,math.huge,'2'})do
  assert(A.PriceReader('Auctionator')(1).age==nil)
 end
 print('PASS: missing prices cache once per refresh; malformed optional Auctionator ages remain unknown.')
+
+-- Saved scans are explicit, or the last Auto fallback; an absent scan item never invents a quote.
+local reads=0
+A.ScanPrice=function(id)reads=reads+1;return id==1 and{value=77,source='AH scan · unit estimate',scannedAt=1234,age=0}end
+TSM_API=nil;Auctionator=nil
+local read,_,stats=A.PriceReader('Scan');assert(read(1).value==77 and read(1).scannedAt==1234)
+read(1);assert(reads==1 and stats.scan and stats.scanAt==1234 and not stats.auctionator)
+assert(not read(2))
+TSM_API={GetCustomPriceValue=function()return 99 end};assert(A.PriceReader('Auto')(1).value==99)
+assert(A.PriceReader('Scan')(1).value==77)
+TSM_API=nil;assert(A.PriceReader('Auto')(1).value==77)
+print('PASS: explicit scan source, unit-quote cache, truthful scan timestamps and unchanged addon priority in Auto.')

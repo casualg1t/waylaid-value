@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.0 candidate — not publicly released
+
+- Add an independent targeted AH scanner, started/stopped with `/crates scan`, with guarded pagination, throttling, cancellation and atomic snapshot replacement.
+- Keep scan snapshots local to the realm/faction and show their actual timestamps; preserve TSM and Auctionator priority in Auto.
+- Add crate item-tooltip sections with Off, Compact, Shift and Always modes, without triggering AH requests on hover.
+- Preserve market-price ranking and owned-item reminders; scan quotes remain unit estimates, not stock-aware purchase plans.
+- Settings panel and header buttons await approval of their proposed composition.
+
 ## 0.5.4
 
 - Show owned/required filling-material counts below ranked bundles and beside every selected-crate alternative.

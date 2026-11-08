@@ -15,6 +15,7 @@ end
 function U.ItemText(f,id,name)f:SetText(name or A.ItemName(id));f:SetTextColor(U.ItemColor(id))end
 function U.Money(value)return A.Money(value,true)end
 function A.BagCount(id)
+ if WaylaidValueDB and WaylaidValueDB.bagHints==false then return nil end
  -- Current character's bags only: bank/charges must not become owned-crate counts.
  local modern=C_Item and C_Item.GetItemCount
  for _,get in ipairs({modern or false,GetItemCount or false})do
@@ -130,7 +131,10 @@ end
 function U.ItemTooltip(b,id,price,extra)
  b.wvTooltipKind='item';tooltipEvents(b,function(self)
   GameTooltip:SetOwner(self,'ANCHOR_RIGHT');if GameTooltip.ClearLines then GameTooltip:ClearLines()end;if id and id>0 then GameTooltip:SetItemByID(id)end
-  if price then GameTooltip:AddLine(U.Money(price.value)..' each · '..price.source,0.75,0.75,0.70,true);if price.age then GameTooltip:AddLine('Price age: '..price.age..' day(s)',0.75,0.75,0.70)end end
+  if price then GameTooltip:AddLine(U.Money(price.value)..' each · '..price.source,0.75,0.75,0.70,true)
+   if price.scannedAt and date then GameTooltip:AddLine('Scanned '..date('%d %b %H:%M',price.scannedAt)..' · stock may have changed',.75,.75,.70,true)
+   elseif price.age then GameTooltip:AddLine('Price age: '..price.age..' day(s)',0.75,0.75,0.70)end
+  end
   if extra then GameTooltip:AddLine(extra,0.87,0.76,0.49,true)end;GameTooltip:Show()
  end)
 end

@@ -29,10 +29,13 @@ function A.PriceReader(mode)
       local price
       if mode == "TSM" then price = tsm(id)
       elseif mode == "Auctionator" then price = auctionator(id)
-      else price = tsm(id) or auctionator(id) end
+      elseif mode == "Scan" then price = A.ScanPrice and A.ScanPrice(id)
+      else price = tsm(id) or auctionator(id) or (A.ScanPrice and A.ScanPrice(id)) end
       cache[id] = price or false
       if price then
-        if price.source=="TSM minimum buyout" then stats.tsm=true else stats.auctionator=true end
+        if price.source=="TSM minimum buyout" then stats.tsm=true
+        elseif price.scannedAt then stats.scan=true;stats.scanAt=math.min(stats.scanAt or price.scannedAt,price.scannedAt)
+        else stats.auctionator=true end
         if price.age then stats.maxAge=math.max(stats.maxAge or 0,price.age)end
       end
     end

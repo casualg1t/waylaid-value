@@ -27,7 +27,11 @@ end
 function A.UpdatePriceStatus(stats,errors,context)
  if not frame then return end
  local tsm,atr=A.ProviderStatus();local mode=WaylaidValueDB.source
- if(mode=='TSM'and not tsm)or(mode=='Auctionator'and not atr)or(not tsm and not atr)then frame.status:SetText('No compatible price addon · enable the selected source, then Refresh')
+ local saved=A.ScanSnapshot and A.ScanSnapshot()
+ if A.scanState and A.scanState.running then frame.status:SetText(A.scanState.message)
+ elseif mode=='Scan'then frame.status:SetText(saved and('AH scan · '..date('%d %b %H:%M',saved.at)..' · unit estimates; stock may change')or 'No AH scan for this realm / faction · open the AH and scan')
+ elseif stats and stats.scan then frame.status:SetText((stats.tsm or stats.auctionator)and 'Mixed addon / AH scan unit estimates · sources in item tooltips'or('AH scan · '..date('%d %b %H:%M',stats.scanAt)..' · unit estimates'))
+ elseif(mode=='TSM'and not tsm)or(mode=='Auctionator'and not atr)or(not tsm and not atr)then frame.status:SetText('No compatible price addon · enable the selected source, then Refresh')
  elseif next(errors or{})then frame.status:SetText('Price source error · let the addon finish loading, then Refresh')
  elseif stats and stats.tsm and stats.auctionator then frame.status:SetText('Mixed TSM / Auctionator cached prices · item sources in tooltips')
  elseif(stats and stats.auctionator)or mode=='Auctionator'or(mode=='Auto'and not tsm and atr)then frame.status:SetText('Auctionator cached prices'..(stats and stats.maxAge and(' · oldest reported age '..stats.maxAge..' day(s)')or ' · age not provided'))
@@ -37,7 +41,7 @@ end
 function A.Refresh()
  if not frame then return end
  local tsm,atr=A.ProviderStatus()
- frame.source:SetText(WaylaidValueDB.source=='Auto'and(tsm and 'Auto · TSM'or atr and 'Auto · Auctionator'or 'Auto')or WaylaidValueDB.source)
+ frame.source:SetText(WaylaidValueDB.source=='Scan'and 'AH scan'or WaylaidValueDB.source=='Auto'and(tsm and 'Auto · TSM'or atr and 'Auto · Auctionator'or 'Auto')or WaylaidValueDB.source)
  if frame.rewards:IsShown()then frame.rewards:Refresh();return end
  local read,errors,stats=A.PriceReader(WaylaidValueDB.source)
  local rows=A.Rank(A.Crates,read,WaylaidValueDB.expert,UnitLevel('player'));local rank,selected=0
@@ -99,14 +103,14 @@ local function create()
   if UIDropDownMenu_Initialize and UIDropDownMenu_CreateInfo and UIDropDownMenu_AddButton and ToggleDropDownMenu then
    if not frame.sourceMenu then frame.sourceMenu=CreateFrame('Frame','WaylaidValueSourceMenu',frame,'UIDropDownMenuTemplate')end
    UIDropDownMenu_Initialize(frame.sourceMenu,function()
-    for _,value in ipairs({'Auto','TSM','Auctionator'})do local key=value;local info=UIDropDownMenu_CreateInfo();info.text=key;info.checked=WaylaidValueDB.source==key;info.func=function()WaylaidValueDB.source=key;A.Refresh()end
-     info.tooltipTitle=key;info.tooltipText=key=='Auto'and 'Use TSM minimum buyout first, then Auctionator when a quote is missing.'or('Use only '..key..' cached quotes. Missing quotes stay unavailable.');info.tooltipOnButton=true;UIDropDownMenu_AddButton(info)end
+    for _,value in ipairs({'Auto','TSM','Auctionator','Scan'})do local key=value;local info=UIDropDownMenu_CreateInfo();info.text=key=='Scan'and 'AH scan'or key;info.checked=WaylaidValueDB.source==key;info.func=function()WaylaidValueDB.source=key;A.Refresh()end
+     info.tooltipTitle=info.text;info.tooltipText=key=='Auto'and 'Use TSM, then Auctionator, then your saved AH scan when quotes are missing.'or key=='Scan'and 'Use only the last complete AH scan for this realm and faction. Quotes are unit estimates; missing items stay unavailable.'or('Use only '..key..' cached quotes. Missing quotes stay unavailable.');info.tooltipOnButton=true;UIDropDownMenu_AddButton(info)end
    end,'MENU');ToggleDropDownMenu(1,nil,frame.sourceMenu,frame.source,0,0)
-  else local modes={Auto='TSM',TSM='Auctionator',Auctionator='Auto'};WaylaidValueDB.source=modes[WaylaidValueDB.source]or 'Auto';A.Refresh()end
+  else local modes={Auto='TSM',TSM='Auctionator',Auctionator='Scan',Scan='Auto'};WaylaidValueDB.source=modes[WaylaidValueDB.source]or 'Auto';A.Refresh()end
  end
  frame.source=U.Button(frame,584,-12,140,'',chooseSource,'Price source',function()
   local tsm,auctionator=A.ProviderStatus()
-  return 'Choose which addon supplies cached unit buyout prices. Auto tries TSM first, then Auctionator for missing items.\n\nTSM: '..(tsm and 'available'or 'not available')..'. Auctionator: '..(auctionator and 'available'or 'not available')..'. Enable/configure a provider, update its prices, then Refresh here.'
+  return 'Choose cached unit buyout prices from TSM, Auctionator or your own AH scan. Auto tries them in that order for missing items.\n\nTSM: '..(tsm and 'available'or 'not available')..'. Auctionator: '..(auctionator and 'available'or 'not available')..'. A scan is used only after it completes; stock is not guaranteed.'
  end)
  frame.refresh=U.Button(frame,734,-12,88,'Refresh',A.Refresh,'Refresh prices','Re-read your price addons and recalculate costs using the current character. This does not scan the auction house. Update or scan with your price addon first to collect newer quotes.')
  frame.close=U.Button(frame,848,-12,28,'×',function()frame:Hide()end,'Close window','Close Waylaid Value. Open it again with /crates or the minimap crate icon. Escape also closes it.')
@@ -146,3 +150,5 @@ local function create()
 end
 function A.Toggle()if not frame then create()end;frame:SetShown(not frame:IsShown())end
 function A.IsShown()return frame and frame:IsShown()end
+function A.SelectedReward()return frame and frame.rewards:IsShown()and frame.rewards.current and frame.rewards.current.reward or nil end
+function A.ScanChanged()if frame and frame:IsShown()then frame.status:SetText(A.scanState.message)end end

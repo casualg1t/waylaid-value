@@ -59,7 +59,7 @@ UIParent=new("Frame");UIParent.width=1280;UIParent.height=900;GameTooltip=new("T
 UnitLevel=function()return 60 end;date=function()return "12:00"end
 local fixture=dofile("tests/snapshot.lua")
 TSM_API={GetCustomPriceValue=function(_,item)return fixture[tonumber(item:match("i:(%d+)"))]end}
-for _,name in ipairs({"Data","Prices","Ranking","RewardsData","Rewards","ItemNames","ItemRequirements","Eligibility","Widgets","RewardsUI","UI","Minimap","Core"}) do assert(loadfile("addon/WaylaidValue/"..name..".lua"))("WaylaidValue",A) end
+for _,name in ipairs({"Data","Scan","Prices","Ranking","RewardsData","Rewards","ItemNames","ItemRequirements","Eligibility","Widgets","ItemTooltips","RewardsUI","UI","Minimap","Core"}) do assert(loadfile("addon/WaylaidValue/"..name..".lua"))("WaylaidValue",A) end
 for _,o in ipairs(objects) do if o.scripts.OnEvent then o.scripts.OnEvent(o,"ADDON_LOADED","WaylaidValue") end end
 assert(type(SlashCmdList.WAYLAIDVALUE)=="function")
 SlashCmdList.WAYLAIDVALUE()
@@ -176,7 +176,7 @@ UIDropDownMenu_Initialize=function(_,fn)menuItems={};fn()end
 UIDropDownMenu_CreateInfo=function()return {}end
 UIDropDownMenu_AddButton=function(info)menuItems[#menuItems+1]=info end
 ToggleDropDownMenu=function()end
-frame.source.scripts.OnClick(frame.source);assert(#menuItems==3)
+frame.source.scripts.OnClick(frame.source);assert(#menuItems==4)
 menuItems[3].func();assert(WaylaidValueDB.source=="Auctionator")
 menuItems[1].func();assert(WaylaidValueDB.source=="Auto")
 frame.rewards.armor.scripts.OnClick(frame.rewards.armor);assert(#menuItems==5)
@@ -367,3 +367,18 @@ materialCount=0;event.scripts.OnEvent(event,'BAG_UPDATE_DELAYED');assert(not sel
 GetItemCount=nil;assert(A.UI.BagNote(bestID,7)=='')
 C_Item,GetItemCount=oldModern,oldLegacy
 print('PASS: partial/full owned filling-material reminders, alternatives, bag refresh and unchanged best bundles/market totals.')
+SlashCmdList.WAYLAIDVALUE('tooltip off');assert(WaylaidValueDB.tooltipMode=='off')
+SlashCmdList.WAYLAIDVALUE('tooltip compact');assert(WaylaidValueDB.tooltipMode=='compact')
+SlashCmdList.WAYLAIDVALUE('tooltip shift');assert(WaylaidValueDB.tooltipMode=='shift')
+local started,stopped,chosen=0,0,nil
+local oldStart,oldStop=A.StartScan,A.CancelScan
+A.StartScan=function(reward)started=started+1;chosen=reward end
+A.CancelScan=function()stopped=stopped+1 end
+frame.rewardTab.scripts.OnClick(frame.rewardTab);frame.rewards.search:SetText('Caustic Smog Potion');frame.rewards:Refresh()
+SlashCmdList.WAYLAIDVALUE('scan');assert(started==1 and chosen.id==frame.rewards.current.reward.id)
+A.scanState.running=true;SlashCmdList.WAYLAIDVALUE('scan');assert(stopped==1)
+SlashCmdList.WAYLAIDVALUE('stop');assert(stopped==2);A.scanState.running=false
+A.StartScan,A.CancelScan=oldStart,oldStop
+WaylaidValueDB.bagHints=false;GetItemCount=function()return 50 end;assert(A.BagCount(1)==nil)
+WaylaidValueDB.bagHints=true;assert(A.BagCount(1)==50);GetItemCount=nil
+print('PASS: slash scan/stop targets the selected reward; tooltip mode commands and bag-hint setting apply immediately.')
