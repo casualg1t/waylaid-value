@@ -43,3 +43,13 @@ The GitHub download is published under `casualg1t/waylaid-value`, with one insta
 WowUp supports installing from the repository URL once a public ZIP release exists. Search/Hub indexing is a separate external step and must not be claimed before observed. Official references: https://wowup.io/guide/get-addons/overview and https://wowup.io/guide/wowup/hub.
 
 CurseForge is a separate submission. Do not claim it is published until the project/file moderation status is observed. An author login is required; use the addon-only identity.
+
+## Distribution checkpoint — 8 November 2026
+
+- GitHub v0.5.4 is public: https://github.com/casualg1t/waylaid-value/releases/tag/v0.5.4.
+- The unauthenticated Forever ZIP download was verified against the local archive (19 files; SHA256 `01da3e10ef95d532c150ac7a4ce6b2656b3172e4271e9528891def1ee95fcb70`).
+- CurseForge project 1792380 was created under `casualg1t`: https://authors.curseforge.com/#/projects/1792380/files. Public slug: `waylaid-value`. Project/file approval is external; confirm moderation status in the author console.
+
+The first CurseForge file is registered as file 9514517, Release, Forever 1.60.1, with automatic publication after approval selected. Source link saved to GitHub. Public listing is https://www.curseforge.com/wow/addons/waylaid-value; until approved it may be unavailable to other accounts.
+
+The CurseForge CDN ZIP was downloaded and verified byte-for-byte against the public GitHub ZIP. The console still displayed `Uploading` after the file was available; processing/moderation approval was not observed. Both real screenshots were uploaded to the gallery, captioned and saved. Do not re-upload merely because the status has not advanced.
