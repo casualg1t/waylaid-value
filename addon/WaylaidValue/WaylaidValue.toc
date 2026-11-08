@@ -1,0 +1,21 @@
+## Interface: 16001
+## Title: Waylaid Value
+## IconTexture: Interface\Icons\INV_Crate_07
+## Notes: Rank Waylaid Crate and filling bundles by gold per Merchant's Favor.
+## Author: Waylaid Value contributors
+## Version: 0.4.1
+## OptionalDeps: TradeSkillMaster, TradeSkillMaster_AppHelper, Auctionator
+## SavedVariables: WaylaidValueDB
+Data.lua
+Prices.lua
+Ranking.lua
+RewardsData.lua
+Rewards.lua
+ItemNames.lua
+ItemRequirements.lua
+Eligibility.lua
+Widgets.lua
+RewardsUI.lua
+UI.lua
+Minimap.lua
+Core.lua
