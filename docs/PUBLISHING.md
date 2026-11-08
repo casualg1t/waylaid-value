@@ -35,3 +35,11 @@ Publish only repository files and the generated install ZIP. Internal working no
 Prepare a fresh repository under the chosen identity, rather than transferring the old repository: GitHub transfers redirect old repository URLs to the new owner. Use a clean source snapshot so earlier documentation links do not become public through Git history. Keep the existing private repository as a backup.
 
 Git commits already use a project name and non-personal noreply address. A separate login requires its own signup/verified email and authentication. An organization supports a separate project namespace and private membership, but public actions by the managing account may still identify that account. Neither option can undo any copies made while an earlier repository was public.
+
+## First public distribution (0.5.4)
+
+The GitHub download is published under `casualg1t/waylaid-value`, with one install asset named `WaylaidValue-0.5.4-forever.zip`. It is byte-identical to the verified locally generated ZIP; the suffix lets WoWUp identify the Forever client. The single TOC retains Interface 16001. `.previews/` contains real in-game screenshots with capture metadata removed and pixel data unchanged. Repository topics include `auction-economy` and `professions` for WowUp categorization.
+
+WowUp supports installing from the repository URL once a public ZIP release exists. Search/Hub indexing is a separate external step and must not be claimed before observed. Official references: https://wowup.io/guide/get-addons/overview and https://wowup.io/guide/wowup/hub.
+
+CurseForge is a separate submission. Do not claim it is published until the project/file moderation status is observed. An author login is required; use the addon-only identity.

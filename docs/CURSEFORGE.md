@@ -10,7 +10,7 @@
 
 **Flavor:** Forever
 
-**Client:** 1.60.1 / Interface 16001; confirm the exact client tested before submitting.
+**Client:** Forever / Interface 16001. Select the matching Forever version offered by the upload form.
 
 **Main category:** Auction & Economy
 
@@ -19,6 +19,8 @@
 **License:** MIT License; preserve the included third-party notices.
 
 **Logo:** `assets/waylaid-value-512.png`
+
+**Screenshots:** `.previews/crates.png`, `.previews/rewards.png` (real in-game captures, capture metadata removed).
 
 **Source:** https://github.com/casualg1t/waylaid-value
 
@@ -30,7 +32,7 @@ Waylaid Value helps you compare Waylaid Crates and estimate the gold needed to u
 
 ### Crates
 
-See the cheapest priced filling bundle for each crate, the Favor it gives, the total net cost and cost per Favor. Select a crate to compare all accepted filling options. Missing prices remain visible.
+See the cheapest priced filling bundle for each crate, the Favor it gives, the total net cost and cost per Favor. Select a crate to compare all accepted filling options. Missing prices remain visible. Muted bag counts show owned empty crates and filling materials, without changing market costs or ranking.
 
 ### Rewards
 

@@ -19,6 +19,10 @@ Open **`/crates`**, **`/waylaid`**, or the draggable crate icon on the minimap. 
 
 ## Install
 
+**WoWUp:** select your Forever client, choose **Get Addons → Install from URL**, and paste `https://github.com/casualg1t/waylaid-value`. Public releases include a Forever ZIP for install and update discovery.
+
+**Manual download:** [latest release](https://github.com/casualg1t/waylaid-value/releases/latest). Choose the ZIP ending in `-forever.zip`.
+
 Download the **WaylaidValue ZIP**, rather than GitHub's source-code archive. Quit WoW, extract the `WaylaidValue` folder into `_forever_/Interface/AddOns/`, and restart. The TOC must be directly inside `AddOns/WaylaidValue/`. When updating, replace the addon folder and retain SavedVariables.
 
 Use **TSM with TSM AppHelper**, or an Auctionator build exposing the v1 price API. OneForAll is not required. Without a price provider, the catalogue remains accessible but costs are unavailable.
@@ -66,6 +70,12 @@ This builds the ZIP and offline report, runs the Lua and JavaScript suites, and 
 Generated files are written to `outputs/` and ignored by Git. Source is in `addon/WaylaidValue/`; public test data is in `fixtures/`. See [validation](docs/VALIDATION.md), [release preparation](docs/PUBLISHING.md), and [changelog](CHANGELOG.md).
 
 `python3 tools/build_ui_preview.py` creates a labelled interactive preview using public frozen fixtures and the actual Lua item facts. It is not a native WoW screenshot. `tools/build_skin.py` regenerates the original 4px-radius skin primitives; `tools/build_eligibility_metadata.py` regenerates requirements, rarity and role fallback facts from the retained tooltip fixture.
+
+## Screenshots
+
+![Crate value ranking](https://raw.githubusercontent.com/casualg1t/waylaid-value/main/.previews/crates.png)
+
+![Profession rewards and crafting estimates](https://raw.githubusercontent.com/casualg1t/waylaid-value/main/.previews/rewards.png)
 
 ## Credits and licensing
 
