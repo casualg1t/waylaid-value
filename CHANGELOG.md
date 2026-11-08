@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.4
+
+- Show owned/required filling-material counts below ranked bundles and beside every selected-crate alternative.
+- Update counts when bags change; explain the reminder in item tooltips.
+- Keep cheapest-bundle selection, market costs and ranking unchanged.
+
 ## 0.5.3
 
 - Mark owned empty crates with a muted bag count, refreshed when bags change.

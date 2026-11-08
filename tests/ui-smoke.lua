@@ -345,3 +345,25 @@ assert(frame.listRows[2].sub:GetText():find('In bags: 2')and frame.detail.subtit
 count=0;event.scripts.OnEvent(event,'BAG_UPDATE_DELAYED');assert(not frame.listRows[2].sub:IsShown()and not frame.detail.subtitle:GetText():find('In bags:'))
 C_Item,GetItemCount=oldModern,oldLegacy
 print('PASS: guarded bag-only API counts and live bag changes; market ordering, costs and selection unchanged.')
+
+-- Owned filling materials are visible for every option, without changing the best bundle.
+local selected=frame.listRows[2]
+local bestID=selected.data.best.item.id
+local alternate=selected.data.options[#selected.data.options].item
+local totals={};for i,b in ipairs(frame.listRows)do totals[i]={b.data.crate.id,b.data.net,b.data.best and b.data.best.item.id}end
+local materialCount=2
+GetItemCount=function(id)return id==bestID and materialCount or id==alternate.id and 999 or 0 end
+A.Refresh()
+for i,prior in ipairs(totals)do local row=frame.listRows[i].data;assert(row.crate.id==prior[1]and row.net==prior[2]and(row.best and row.best.item.id)==prior[3])end
+assert(selected.bundleOwned:GetText():find('In bags: 2 /')and selected.bundleOwned:IsShown())
+assert(frame.detail.options[1].name:GetText():find('In bags:')or frame.detail.options[2].name:GetText():find('In bags:'))
+local foundAlternate=false
+for i,part in ipairs(selected.data.options)do
+ if part.item.id==alternate.id then assert(frame.detail.options[i].name:GetText():find('In bags: 999 /'));foundAlternate=true end
+end
+assert(foundAlternate)
+local label,explanation=A.UI.BagNote(bestID,7);assert(label=='In bags: 2 / 7'and explanation:find('full market costs'))
+materialCount=0;event.scripts.OnEvent(event,'BAG_UPDATE_DELAYED');assert(not selected.bundleOwned:IsShown())
+GetItemCount=nil;assert(A.UI.BagNote(bestID,7)=='')
+C_Item,GetItemCount=oldModern,oldLegacy
+print('PASS: partial/full owned filling-material reminders, alternatives, bag refresh and unchanged best bundles/market totals.')

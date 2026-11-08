@@ -13,8 +13,9 @@ local function selectRow(row)
   local part=row.options[i]
   if part then
    b:Show();U.SetIcon(b.icon,part.item.id)
-   U.ItemText(b.name,part.item.id,part.item.quantity..' × '..A.ItemName(part.item.id,part.item.name)..(part==row.best and ' · best' or ''))
-   b.unit:SetText(part.price and U.Money(part.price.value)or '—');b.total:SetText(part.total and U.Money(part.total)or 'Price missing');U.ItemTooltip(b,part.item.id,part.price,'One filling option: '..part.item.quantity..' items, '..(part.total and U.Money(part.total)or 'price missing')..' for the bundle. Choose one option per crate.')
+   local bagNote,bagHelp=U.BagNote(part.item.id,part.item.quantity)
+   U.ItemText(b.name,part.item.id,part.item.quantity..' × '..A.ItemName(part.item.id,part.item.name)..(part==row.best and ' · best' or '')..(bagNote~=''and(' |cffb5ad9c· '..bagNote..'|r')or ''))
+   b.unit:SetText(part.price and U.Money(part.price.value)or '—');b.total:SetText(part.total and U.Money(part.total)or 'Price missing');U.ItemTooltip(b,part.item.id,part.price,'One filling option: '..part.item.quantity..' items, '..(part.total and U.Money(part.total)or 'price missing')..' for the bundle. Choose one option per crate.'..bagHelp)
   else b:Hide()end
  end
  p.note:SetText(row.reason or('Upfront '..U.Money(row.gross)..' − turn-in money '..U.Money(row.silver)))
@@ -46,7 +47,7 @@ function A.Refresh()
    b=CreateFrame('Button',nil,frame.child);b:SetSize(840,36);b.selection=U.Fill(b,0,0,840,36,U.selection)
    local hover=b:CreateTexture(nil,'HIGHLIGHT');hover:SetAllPoints();hover:SetColorTexture(0.85,0.74,0.45,0.06);U.Fill(b,0,-35,840,1,{0.19,0.21,0.19,1},'BORDER')
    b.rank=U.Text(b,4,-11,22,'',nil,U.muted);b.crateIcon=U.Icon(b,30,-6,0);b.crate=U.Text(b,62,-11,210,'');b.sub=U.Text(b,62,-22,210,'',nil,U.muted)
-   b.itemIcon=U.Icon(b,284,-6,0);b.bundle=U.Text(b,316,-11,224,'');b.favor=U.Text(b,548,-11,42,'',nil,U.text,'RIGHT');b.upfront=U.Text(b,606,-11,100,'',nil,U.text,'RIGHT')
+   b.itemIcon=U.Icon(b,284,-6,0);b.bundle=U.Text(b,316,-11,224,'');b.bundleOwned=U.Text(b,316,-22,224,'',nil,U.muted);b.favor=U.Text(b,548,-11,42,'',nil,U.text,'RIGHT');b.upfront=U.Text(b,606,-11,100,'',nil,U.text,'RIGHT')
    b.net=U.Text(b,726,-3,114,'','GameFontNormal',U.text,'RIGHT');b.ratio=U.Text(b,726,-21,114,'',nil,U.muted,'RIGHT')
    local function choose()selectRow(b.data)end
    U.HintText(b,b.upfront,'Upfront gold',upfrontHelp,choose)
@@ -70,8 +71,11 @@ function A.Refresh()
   if #notes>0 then b.crate:SetPoint('TOPLEFT',62,-3);b.sub:SetText(table.concat(notes,' · '));b.sub:Show()
   else b.crate:SetPoint('TOPLEFT',62,-11);b.sub:Hide()end
   if row.best then U.SetIcon(b.itemIcon,row.best.item.id);b.itemIcon:Show();U.ItemText(b.bundle,row.best.item.id,row.best.item.quantity..' × '..A.ItemName(row.best.item.id,row.best.item.name))
-   U.ItemTooltip(b.bundleHelp,row.best.item.id,row.best.price,row.best.item.quantity..' items = '..U.Money(row.best.total)..'. Choose one bundle per crate; click to compare other filling options.')
-  else b.itemIcon:Hide();b.bundle:SetText('No priced filling bundle');U.Help(b.bundleHelp,'Filling prices missing','No accepted filling option has a usable quote. Update your price addon, then Refresh. Click to inspect every filling option.')end
+   local bagNote,bagHelp=U.BagNote(row.best.item.id,row.best.item.quantity)
+   b.bundle:ClearAllPoints();b.bundle:SetPoint('TOPLEFT',316,bagNote~=''and -3 or -11)
+   b.bundleOwned:SetText(bagNote);b.bundleOwned:SetShown(bagNote~='')
+   U.ItemTooltip(b.bundleHelp,row.best.item.id,row.best.price,row.best.item.quantity..' items = '..U.Money(row.best.total)..'. Choose one bundle per crate; click to compare other filling options.'..bagHelp)
+  else b.itemIcon:Hide();b.bundleOwned:Hide();b.bundle:ClearAllPoints();b.bundle:SetPoint('TOPLEFT',316,-11);b.bundle:SetText('No priced filling bundle');U.Help(b.bundleHelp,'Filling prices missing','No accepted filling option has a usable quote. Update your price addon, then Refresh. Click to inspect every filling option.')end
   b.favor:SetText(row.crate.favor or '?');b.upfront:SetText(U.Money(row.gross));b.net:SetText(row.net and U.Money(row.net)or '—')
   b.ratio:SetText(row.ratio and string.format('%.1f|cffeda55fc|r per Favor',math.floor(row.ratio*10+0.5)/10)or 'Not ranked')
   local explanation=row.reason or(row.crate.provisional and 'Expert Favor reward is unverified; treat this ranking as provisional.'or 'Click to compare filling options')

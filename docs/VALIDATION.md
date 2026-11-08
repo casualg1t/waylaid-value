@@ -1,5 +1,9 @@
 # Validation
 
+## 0.5.4 filling-material reminders
+
+Callback regressions cover partial and excess owned materials, selected-crate alternatives, live bag updates, missing APIs and hidden zero counts. Market totals, ranking and cheapest-bundle choices remain identical with inventory present. Counts describe one filling bundle, not an entire Rewards shopping plan. No inventory is deducted from quotes. Native rendering remains unverified.
+
 ## 0.5.3 bag reminder
 
 Callback checks cover modern/legacy item-count fallbacks, unavailable and invalid counts, explicit bank/charge exclusion, bag-change refresh, hidden zero counts, and unchanged ordering, net costs and selection when a more expensive crate is owned. Inventory is a display annotation added after ranking; the pricing model and Rewards optimizer remain unchanged. Native bag-event timing and text rendering still require field verification.

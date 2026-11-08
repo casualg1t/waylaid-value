@@ -25,6 +25,12 @@ function A.BagCount(id)
  end
  return nil -- unavailable, not a confirmed zero
 end
+function U.BagNote(id,required)
+ local count=A.BagCount(id)
+ if not count or count==0 then return '',''end
+ return 'In bags: '..count..' / '..required,
+  '\nIn bags: '..count..' of '..required..' needed. Current character bags only; bank excluded. Ownership is a reminder only: full market costs, cheapest bundle and ranking are unchanged.'
+end
 local function sliced(f,asset,layer)
  local pieces={}
  local points={'TOPLEFT','TOP','TOPRIGHT','LEFT','CENTER','RIGHT','BOTTOMLEFT','BOTTOM','BOTTOMRIGHT'}
