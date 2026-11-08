@@ -3,7 +3,7 @@
 ## IconTexture: Interface\Icons\INV_Crate_07
 ## Notes: Rank Waylaid Crate and filling bundles by gold per Merchant's Favor.
 ## Author: Waylaid Value contributors
-## Version: 0.5.2
+## Version: 0.5.3
 ## OptionalDeps: TradeSkillMaster, TradeSkillMaster_AppHelper, Auctionator
 ## SavedVariables: WaylaidValueDB
 Data.lua

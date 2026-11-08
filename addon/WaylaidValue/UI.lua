@@ -7,7 +7,7 @@ local expertHelp='Expert is a level-20+ crate tier. Enable this to show Expert c
 local function short(c)return(A.ItemName(c.id,c.name):gsub('^Waylaid Crate: ',''))end
 local function selectRow(row)
  selectedID=row.crate.id;local p=frame.detail
- U.ItemText(p.title,row.crate.id,short(row.crate));p.subtitle:SetText('One crate gives '..(row.crate.favor or '?')..' Favor · choose one filling bundle')
+ U.ItemText(p.title,row.crate.id,short(row.crate));p.subtitle:SetText('One crate gives '..(row.crate.favor or '?')..' Favor · choose one filling bundle'..((row.bagCount or 0)>0 and(' · In bags: '..row.bagCount)or ''))
  p.cost:SetText(row.price and U.Money(row.price.value)or 'Price missing')
  for i,b in ipairs(p.options)do
   local part=row.options[i]
@@ -60,17 +60,23 @@ function A.Refresh()
    end,choose)
    b:SetScript('OnClick',function(self)selectRow(self.data)end);frame.listRows[i]=b
   end
+  row.bagCount=A.BagCount(row.crate.id)
   b.data=row;b:SetPoint('TOPLEFT',0,-(i-1)*36);b:Show()
   if row.ratio then rank=rank+1;b.rank:SetText(rank)else b.rank:SetText('—')end
   U.SetIcon(b.crateIcon,row.crate.id);U.ItemText(b.crate,row.crate.id,short(row.crate));b.crate:ClearAllPoints()
-  if row.reason or row.crate.provisional then b.crate:SetPoint('TOPLEFT',62,-3);b.sub:SetText(row.reason or 'Expert reward provisional');b.sub:Show()
+  local notes={}
+  if row.reason or row.crate.provisional then notes[#notes+1]=row.reason or 'Expert reward provisional'end
+  if (row.bagCount or 0)>0 then notes[#notes+1]='In bags: '..row.bagCount end
+  if #notes>0 then b.crate:SetPoint('TOPLEFT',62,-3);b.sub:SetText(table.concat(notes,' · '));b.sub:Show()
   else b.crate:SetPoint('TOPLEFT',62,-11);b.sub:Hide()end
   if row.best then U.SetIcon(b.itemIcon,row.best.item.id);b.itemIcon:Show();U.ItemText(b.bundle,row.best.item.id,row.best.item.quantity..' × '..A.ItemName(row.best.item.id,row.best.item.name))
    U.ItemTooltip(b.bundleHelp,row.best.item.id,row.best.price,row.best.item.quantity..' items = '..U.Money(row.best.total)..'. Choose one bundle per crate; click to compare other filling options.')
   else b.itemIcon:Hide();b.bundle:SetText('No priced filling bundle');U.Help(b.bundleHelp,'Filling prices missing','No accepted filling option has a usable quote. Update your price addon, then Refresh. Click to inspect every filling option.')end
   b.favor:SetText(row.crate.favor or '?');b.upfront:SetText(U.Money(row.gross));b.net:SetText(row.net and U.Money(row.net)or '—')
   b.ratio:SetText(row.ratio and string.format('%.1f|cffeda55fc|r per Favor',math.floor(row.ratio*10+0.5)/10)or 'Not ranked')
-  U.ItemTooltip(b,row.crate.id,row.price,row.reason or(row.crate.provisional and 'Expert Favor reward is unverified; treat this ranking as provisional.'or 'Click to compare filling options'))
+  local explanation=row.reason or(row.crate.provisional and 'Expert Favor reward is unverified; treat this ranking as provisional.'or 'Click to compare filling options')
+  if (row.bagCount or 0)>0 then explanation=explanation..'\nIn bags: '..row.bagCount..'. This is only a reminder. Ranking and shopping plans still use market prices; owned crates are not treated as free or given priority.'end
+  U.ItemTooltip(b,row.crate.id,row.price,explanation)
   if selectedID==row.crate.id then selected=row end
  end
  for i=#rows+1,#frame.listRows do frame.listRows[i]:Hide()end

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.3
+
+- Mark owned empty crates with a muted bag count, refreshed when bags change.
+- Preserve market-price ranking, selection and shopping costs regardless of ownership.
+- Explain the reminder in crate tooltips; exclude bank contents.
+
 ## 0.5.2
 
 - Add explanatory tooltips to buttons, tabs, dropdown choices, inputs and profession navigation.

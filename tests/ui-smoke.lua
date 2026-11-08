@@ -317,3 +317,31 @@ helpText(frame.refresh);frame.source:Hide();assert(GameTooltip:IsShown())
 frame.refresh:Hide();assert(not GameTooltip:IsShown());frame.refresh:Show();frame.source:Show()
 assert(A.minimapButton.scripts.OnHide) -- help hooks preserve the drag-stop handler tested above
 print('PASS: all clickable addon controls and menu choices have help; Expert meaning, disabled reasons, row click forwarding, reuse and tooltip ownership.')
+
+-- Bag ownership is an annotation, never a free-price or ranking input.
+local oldModern,oldLegacy=C_Item,GetItemCount
+C_Item=nil;GetItemCount=nil;assert(A.BagCount(1)==nil)
+GetItemCount=function(id,bank,charges)assert(bank==false and charges==false);return 0 end
+assert(A.BagCount(1)==0)
+C_Item={GetItemCount=function()error('not ready')end}
+GetItemCount=function()return 3 end;assert(A.BagCount(1)==3)
+for _,bad in ipairs({-1,0/0,math.huge,1.5,'3'})do
+ C_Item.GetItemCount=function()return bad end;GetItemCount=nil;assert(A.BagCount(1)==nil)
+end
+C_Item=nil;GetItemCount=nil
+frame.crateTab.scripts.OnClick(frame.crateTab)
+local before={}
+for i,b in ipairs(frame.listRows)do if b:IsShown()then before[i]={id=b.data.crate.id,net=b.data.net,rank=b.rank:GetText()}end end
+local ownedID=before[2].id;local count=4
+GetItemCount=function(id,bank,charges)assert(bank==false and charges==false);return id==ownedID and count or 0 end
+local selectedTitle=frame.detail.title:GetText()
+A.Refresh()
+for i,prior in ipairs(before)do local b=frame.listRows[i];assert(b.data.crate.id==prior.id and b.data.net==prior.net and b.rank:GetText()==prior.rank)end
+assert(frame.detail.title:GetText()==selectedTitle)
+assert(frame.listRows[2].sub:GetText():find('In bags: 4'))
+frame.listRows[2].scripts.OnClick(frame.listRows[2]);assert(frame.detail.subtitle:GetText():find('In bags: 4'))
+C_Timer=nil;count=2;event.scripts.OnEvent(event,'BAG_UPDATE_DELAYED')
+assert(frame.listRows[2].sub:GetText():find('In bags: 2')and frame.detail.subtitle:GetText():find('In bags: 2'))
+count=0;event.scripts.OnEvent(event,'BAG_UPDATE_DELAYED');assert(not frame.listRows[2].sub:IsShown()and not frame.detail.subtitle:GetText():find('In bags:'))
+C_Item,GetItemCount=oldModern,oldLegacy
+print('PASS: guarded bag-only API counts and live bag changes; market ordering, costs and selection unchanged.')

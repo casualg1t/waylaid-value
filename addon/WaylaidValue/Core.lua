@@ -4,9 +4,10 @@ event:RegisterEvent("ADDON_LOADED")
 event:RegisterEvent("GET_ITEM_INFO_RECEIVED")
 event:RegisterEvent("SKILL_LINES_CHANGED")
 event:RegisterEvent("PLAYER_LEVEL_UP")
+event:RegisterEvent("BAG_UPDATE_DELAYED")
 local pending=false
 event:SetScript("OnEvent",function(_,kind,name)
-  if kind=="GET_ITEM_INFO_RECEIVED" or kind=="SKILL_LINES_CHANGED" or kind=="PLAYER_LEVEL_UP" then
+  if kind=="GET_ITEM_INFO_RECEIVED" or kind=="SKILL_LINES_CHANGED" or kind=="PLAYER_LEVEL_UP" or kind=="BAG_UPDATE_DELAYED" then
     if not A.IsShown() or pending then return end
     pending=true
     if C_Timer and C_Timer.After then C_Timer.After(0.1,function()pending=false;if A.IsShown()then A.Refresh()end end)

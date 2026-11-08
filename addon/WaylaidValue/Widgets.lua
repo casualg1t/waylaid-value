@@ -14,6 +14,17 @@ function U.ItemColor(id)
 end
 function U.ItemText(f,id,name)f:SetText(name or A.ItemName(id));f:SetTextColor(U.ItemColor(id))end
 function U.Money(value)return A.Money(value,true)end
+function A.BagCount(id)
+ -- Current character's bags only: bank/charges must not become owned-crate counts.
+ local modern=C_Item and C_Item.GetItemCount
+ for _,get in ipairs({modern or false,GetItemCount or false})do
+  if type(get)=='function'then
+   local ok,count=pcall(get,id,false,false)
+   if ok and type(count)=='number'and count==count and count>=0 and count<math.huge and count==math.floor(count)then return count end
+  end
+ end
+ return nil -- unavailable, not a confirmed zero
+end
 local function sliced(f,asset,layer)
  local pieces={}
  local points={'TOPLEFT','TOP','TOPRIGHT','LEFT','CENTER','RIGHT','BOTTOMLEFT','BOTTOM','BOTTOMRIGHT'}

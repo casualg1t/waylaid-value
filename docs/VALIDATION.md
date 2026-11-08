@@ -1,5 +1,9 @@
 # Validation
 
+## 0.5.3 bag reminder
+
+Callback checks cover modern/legacy item-count fallbacks, unavailable and invalid counts, explicit bank/charge exclusion, bag-change refresh, hidden zero counts, and unchanged ordering, net costs and selection when a more expensive crate is owned. Inventory is a display annotation added after ranking; the pricing model and Rewards optimizer remain unchanged. Native bag-event timing and text rendering still require field verification.
+
 ## 0.5.2 explanatory hover help
 
 All clickable addon controls have help, including the minimap button and menu choices. A callback audit checks every clickable Button/CheckButton under the addon and evaluates the explanatory help bodies. Tests check Expert meaning/15-or-30 estimates, dynamic provider status, disabled direct-purchase/empty-selection reasons, price-cell click forwarding, help-frame reuse and tooltip ownership. Existing minimap OnHide drag handling is preserved. Disabled-control hit areas hide when inputs are enabled, and the hidden no-professions message does not leave a hover area over profession navigation.

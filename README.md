@@ -2,9 +2,11 @@
 
 Compare the gold cost of Waylaid Crates and plan Merchant's Favor recipe unlocks in **World of Warcraft: Forever**.
 
-Version **0.5.2** · Interface **16001** · MIT license
+Version **0.5.3** · Interface **16001** · MIT license
 
 ## What it does
+
+Owned empty crates show a muted **In bags** count in Crates. This reminder uses the current character’s bags, excludes the bank, and does not change ranking, selection, market costs or Rewards shopping plans.
 
 - Ranks each crate with its cheapest priced filling bundle, total net cost and cost per Favor.
 - Shows every accepted filling option, with native item tooltips.
