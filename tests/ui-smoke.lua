@@ -259,3 +259,17 @@ GetItemInfo=nil
 v.search:SetText('not an item');v.search.scripts.OnTextChanged();assert(not v.detail.icon.holder:IsShown())
 assert(v.role.point[2]+v.role:GetWidth()<=860)
 print('PASS: role dropdown callbacks, actual rarity-colored list/title, live rarity override, icon-frame hiding and reusable rounded skin.')
+WaylaidValueDB.source='TSM'
+v.search:SetText('Caustic Smog Potion');v:Refresh()
+local priced=v.listRows[1]
+assert(priced.reward.name=='Caustic Smog Potion'and priced.craft:GetText()==A.Money(15766,true))
+assert(priced.craftCost.materials==v.current.materials and priced:GetHeight()==32)
+assert(priced.name:GetWidth()==184 and priced.craft.point[2]+priced.craft:GetWidth()<=224)
+v.held:SetText('180');v.held.scripts.OnTextChanged();v.learned:SetChecked(true);v.learned.scripts.OnClick()
+assert(priced.craft:GetText()==A.Money(15766,true))
+fixture[8845]=7100;v:Refresh();assert(priced.craft:GetText()==A.Money(15966,true)and v.current.materials==15966)
+fixture[8845]=nil;v:Refresh();assert(priced.craft:GetText()=='Price missing'and v.current.materials==nil)
+fixture[8845]=7000
+local purchase;for _,reward in ipairs(A.Rewards)do if reward.purchase then purchase=reward;break end end
+v.search:SetText(purchase.name);v:Refresh();assert(v.listRows[1].craft:GetText()=='—')
+print('PASS: compact row craft quotes, refresh updates, held/learned independence, missing prices and direct rewards.')

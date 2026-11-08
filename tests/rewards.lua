@@ -51,3 +51,10 @@ for _,bad in ipairs({math.huge,-math.huge,0/0,'1e999'})do
  assert(not result.total and not result.plan and result.reason)
 end
 print('PASS: non-finite Favor inputs cannot produce free rewards or an invalid planner loop.')
+local craft={reagents={{id=1,quantity=2},{id=2,quantity=3}}}
+local craftQuote=A.CraftCost(craft,function(id)return {value=id==1 and 123 or 25}end)
+assert(craftQuote.materials==321 and craftQuote.missing==0 and not craftQuote.plan)
+craftQuote=A.CraftCost(craft,function(id)if id==1 then return{value=123}end end)
+assert(craftQuote.materials==nil and craftQuote.missing==1)
+assert(A.CraftCost({},function()error('No reagent to price')end).materials==nil)
+print('PASS: craft-only material totals and missing quotes are independent of recipe unlocks.')

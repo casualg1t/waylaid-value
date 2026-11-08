@@ -2,7 +2,7 @@
 
 Compare the gold cost of Waylaid Crates and plan Merchant's Favor recipe unlocks in **World of Warcraft: Forever**.
 
-Version **0.5.0** · Interface **16001** · MIT license
+Version **0.5.1** · Interface **16001** · MIT license
 
 ## What it does
 
@@ -36,6 +36,8 @@ The catalogue contains 30 crates, 96 filling bundles and 321 assembled rewards. 
 **For my class** also separates role relevance from equip permission. For hunters it keeps physical DPS, general supplies and unclassified items; clearly healing/caster-only gear is hidden. Choose **All roles**, **Physical DPS**, **Spell DPS**, **Healing**, **Tank** or **General** to browse differently. Explicit role choices require a classified match; unknowns remain available under All roles and For my class. Hybrid classes can select a role manually; no talent spec is guessed. These are conservative tooltip-stat affinities, not upgrade rankings. Self-healing supplies and engineering bombs can be general use, while healing-power equipment is healing gear.
 
 Item names and icon borders use the item's rarity, with live-client quality taking precedence over the retained fallback. Currency units use gold/silver/copper colors consistently. The warm rounded controls, framed tabs and reward rows follow the OneForAll design reference while retaining this addon's existing window and tabs. The small skin textures are independently generated project assets; no OneForAll UI source or artwork is included.
+
+The compact reward list shows a full-width item name, Favor price and **Craft** material cost on each row. Craft means one craft's reagents only, excluding the recipe unlock; it does not change with held Favor or the learned-recipe input. Roles remain in the item tooltip and selected detail. A `!` flags a blocked/unverified requirement when browsing outside the active requirement filters. Missing quotes say **Price missing**; direct rewards show a dash because they are not crafted.
 
 The level/class filter checks the finished item, including item-use profession requirements. The skill filter checks the recipe's profession rank. They do not confirm trained weapon proficiency, reputation or recipe ownership. Enter your **Favor held** and check **Recipe already learned** when applicable. Total estimated net cost includes the remaining unlock and one craft, not necessarily one output item.
 

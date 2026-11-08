@@ -80,7 +80,7 @@ function U.ItemTooltip(b,id,price,extra)
  end)
  b:SetScript('OnLeave',function()GameTooltip:Hide()end)
 end
-function U.RewardTooltip(b,reward)
+function U.RewardTooltip(b,reward,craftCost)
  b:SetScript('OnEnter',function(self)
   GameTooltip:SetOwner(self,'ANCHOR_RIGHT')
   if GameTooltip.ClearLines then GameTooltip:ClearLines()end
@@ -92,6 +92,10 @@ function U.RewardTooltip(b,reward)
   GameTooltip:AddLine(' ')
   GameTooltip:AddLine(reward.profession..(reward.skill and(' · skill '..reward.skill)or ''),0.87,0.76,0.49)
   if reward.favor then GameTooltip:AddLine((reward.purchase and 'Price: 'or 'Recipe price: ')..reward.favor..' Favor',0.75,0.75,0.70)end
+  if craftCost then
+   GameTooltip:AddLine('One craft: '..(craftCost.materials and U.Money(craftCost.materials)or 'Material prices missing'),0.90,0.86,0.78,true)
+   GameTooltip:AddLine('Materials only. Recipe unlock is separate; cost is per craft, not per output item.',0.75,0.75,0.70,true)
+  elseif reward.purchase then GameTooltip:AddLine('Direct reward; no crafting materials.',0.75,0.75,0.70)end
   local _,role=A.RewardRoles(reward);GameTooltip:AddLine(role,0.75,0.75,0.70,true)
   if A.ReadCharacter then
    local profile=A.ReadCharacter()

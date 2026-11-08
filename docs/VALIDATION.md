@@ -1,5 +1,11 @@
 # Validation
 
+## 0.5.1 compact craft quotes
+
+Reward rows are 32px high at a 34px pitch, with 184px-wide item names. The second line retains Favor and adds right-aligned one-craft material cost. Roles remain available in native tooltips and selected detail. A shared material-cost calculation supplies both the row quote and selected cost breakdown without planning Favor for every row.
+
+Regression checks cover exact row/detail material-cost agreement, updated quotes after Refresh, unchanged row cost when held Favor/learned recipe changes, missing reagent prices, direct rewards, row height and column bounds. The preview is checked for inline prices and compact rows; actual game rendering still requires field verification.
+
 ## 0.5.0 presentation and role checks
 
 Added regressions for retained/live rarity precedence, actual name colors, icon-frame visibility, reusable rounded skin, native role dropdown and combined filters. Real tooltip cases distinguish healing leather, hybrid spell gear, physical DPS and general engineering bombs. Money tests cover colored denominations, negative amounts and zero; a 20-Favor turn-in must subtract 1,000 copper (10 silver). Native UI callbacks preserve selection, learned state, held Favor and net totals.

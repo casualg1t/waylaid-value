@@ -23,7 +23,8 @@ function A.BuildRewardsView(window)
  end
  p.usable=check(156,150,'My level / class','Checks whether your character can use the item. Role relevance is a separate filter. Weapon training and reputation are not checked. Unverified requirements are hidden while this filter is on.')
  p.skill=check(320,180,'Within my skill','Match your learned profession and current crafting skill. Recipe ownership is not checked. Unverified skill requirements are hidden while this filter is on.')
- local count=U.Text(p,156,-74,260,'',nil,U.muted);p.count=count
+ local count=U.Text(p,156,-74,132,'',nil,U.muted);p.count=count
+ U.Text(p,296,-74,84,'Craft',nil,U.muted,'RIGHT')
  p.hiddenCount=U.Text(p,426,-74,434,'',nil,U.muted,'RIGHT')
  local list,child=U.Scroll(p,156,-98,224,488)
  U.Fill(p,394,-98,1,492,U.line,'BORDER')
@@ -129,21 +130,25 @@ function A.BuildRewardsView(window)
    local r=entry.reward
    local b=listRows[i]
    if not b then
-    b=CreateFrame('Button',nil,child);b:SetSize(224,44);U.Row(b);b.selection=U.Fill(b,2,-2,220,40,U.selection)
+    b=CreateFrame('Button',nil,child);b:SetSize(224,32);U.Row(b);b.selection=U.Fill(b,2,-2,220,28,U.selection)
     local hover=b:CreateTexture(nil,'HIGHLIGHT');hover:SetAllPoints();hover:SetColorTexture(0.85,0.74,0.45,0.06)
-    b.icon=U.Icon(b,4,-8,0);b.name=U.Text(b,36,-4,146,'');b.profession=U.Text(b,36,-23,146,'',nil,U.muted)
-    b.favor=U.Text(b,186,-6,34,'',nil,U.gold,'RIGHT');b.favorLabel=U.Text(b,186,-23,34,'Favor',nil,U.muted,'RIGHT')
+    b.icon=U.Icon(b,4,-4,0);b.name=U.Text(b,36,-2,184,'')
+    b.favor=U.Text(b,36,-18,72,'',nil,U.muted)
+    b.profession=U.Text(b,110,-18,14,'',nil,U.gold)
+    b.craft=U.Text(b,130,-18,90,'',nil,U.text,'RIGHT')
     b:SetScript('OnClick',function(self)if selected~=self.reward then p.learned:SetChecked(false)end;selected=self.reward;show()end);listRows[i]=b
    end
    local reason=entry.usable~=true and entry.useReason or entry.skilled~=true and entry.skillReason
-   b.reward=r;b:SetPoint('TOPLEFT',0,-(i-1)*46);b:Show();U.SetIcon(b.icon,r.id);U.ItemText(b.name,r.id,r.name)
-   local _,role=A.RewardRoles(r)
-   b.profession:SetText(reason or role);b.profession:SetTextColor((unpack or table.unpack)(reason and U.gold or U.muted))
-   b.favor:SetText(r.favor or '?');U.RewardTooltip(b,r)
+   b.reward=r;b:SetPoint('TOPLEFT',0,-(i-1)*34);b:Show();U.SetIcon(b.icon,r.id);U.ItemText(b.name,r.id,r.name)
+   b.profession:SetText(reason and '!'or '')
+   b.favor:SetText((r.favor or '?')..' Favor')
+   b.craftCost=not r.purchase and A.CraftCost(r,read)or nil
+   b.craft:SetText(r.purchase and '—'or(b.craftCost.materials and U.Money(b.craftCost.materials)or 'Price missing'))
+   U.RewardTooltip(b,r,b.craftCost)
   end
   for i=#visible+1,#listRows do listRows[i]:Hide()end
-  p.visibleCount=#visible;child:SetHeight(math.max(1,#visible*46));if reset then list:SetVerticalScroll(0)else U.ClampScroll(list,#visible*46,488)end
-  count:SetText(#visible..' rewards · '..(p.options.profession=='mine'and 'your professions'or p.options.profession=='all'and 'all professions'or p.options.profession))
+  p.visibleCount=#visible;child:SetHeight(math.max(1,#visible*34));if reset then list:SetVerticalScroll(0)else U.ClampScroll(list,#visible*34,488)end
+  count:SetText(#visible..' rewards')
   p.hiddenCount:SetText(summary.hidden>0 and(summary.hidden..' hidden by filters'..(summary.unknown>0 and(' · '..summary.unknown..' unverified')or ''))or '')
   show();A.UpdatePriceStatus(stats,errors,#visible..' / '..#A.Rewards..' rewards')
  end

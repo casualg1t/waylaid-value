@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.1
+
+- Tighten reward rows from 44px to 32px and give item names more room.
+- Show one-craft material cost directly beside every craftable reward, with Favor kept separate.
+- Move repeated role labels to tooltips and selected detail; flag blocked requirements compactly.
+- Keep missing prices explicit and show a dash for direct rewards.
+
 ## 0.5.0
 
 - Color reward, crate and material names/icons by item rarity.

@@ -45,7 +45,8 @@ function A.PlanFavor(rows,target)
   table.sort(plan.steps,function(a,b)return a.row.crate.id<b.row.crate.id end)
   return plan
 end
-function A.CostReward(reward,readPrice,crateRows,held,learned)
+-- One craft's materials only; independent of Favor, recipe ownership and unlock plans.
+function A.CraftCost(reward,readPrice)
   local result={reward=reward,reagents={},missing=0,materials=0}
   if not reward.reagents then result.materials=nil;result.missing=1
   else
@@ -57,6 +58,10 @@ function A.CostReward(reward,readPrice,crateRows,held,learned)
     end
     if result.missing>0 then result.materials=nil end
   end
+  return result
+end
+function A.CostReward(reward,readPrice,crateRows,held,learned)
+  local result=A.CraftCost(reward,readPrice)
   held=tonumber(held) or 0
   if held~=held or math.abs(held)==math.huge then result.reason="Enter a finite Favor balance";return result end
   held=math.max(0,math.floor(held))
