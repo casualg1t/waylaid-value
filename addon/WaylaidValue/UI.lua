@@ -40,6 +40,7 @@ function A.UpdatePriceStatus(stats,errors,context)
 end
 function A.Refresh()
  if not frame then return end
+ if A.UpdateScanControls then A.UpdateScanControls()end
  local tsm,atr=A.ProviderStatus()
  frame.source:SetText(WaylaidValueDB.source=='Scan'and 'AH scan'or WaylaidValueDB.source=='Auto'and(tsm and 'Auto · TSM'or atr and 'Auto · Auctionator'or 'Auto')or WaylaidValueDB.source)
  if frame.rewards:IsShown()then frame.rewards:Refresh();return end
@@ -98,7 +99,18 @@ local function create()
  U.Skin(frame,{0.065,0.058,0.048,0.98},{0.50,0.40,0.25,0.95})
  U.Fill(frame,4,-4,892,46,{0.10,0.078,0.045,1})
  frame:SetScale(math.min(1,(UIParent:GetWidth()-24)/900,(UIParent:GetHeight()-24)/730))
- U.Icon(frame,20,-10,248682,32);U.Text(frame,62,-17,420,'Waylaid Value','GameFontNormalLarge',U.gold,nil,18);U.Text(frame,540,-22,42,'Prices',nil,U.muted)
+ U.Icon(frame,20,-10,248682,32);U.Text(frame,62,-17,260,'Waylaid Value','GameFontNormalLarge',U.gold,nil,18);U.Text(frame,540,-22,42,'Prices',nil,U.muted)
+ frame.settingsButton=U.Button(frame,344,-12,86,'Settings',function()A.ToggleSettings()end,'Settings','Choose crate item-tooltip detail, bag reminders and minimap visibility. Changes are saved immediately; Crates and Rewards keep their current filters and selection.')
+ local function scanHelp()
+  if A.scanState.running then return A.scanState.message..'\n\nStop this scan and keep the previous complete snapshot. No purchases are made.'end
+  local ready,reason=A.ScanAvailable()
+  return (not ready and(reason..'\n\n')or '')..'Scan catalogue crates and their filling materials, plus reagents for the reward currently selected in Rewards. Searches run only after your click, at the AH. Another search or closing the AH interrupts the scan. A complete scan selects AH scan as the price source. Results are dated unit-price estimates; stock and whole-stack costs are not guaranteed.'
+ end
+ frame.scan=U.Button(frame,440,-12,88,'Scan AH',function()
+  if A.scanState.running then A.CancelScan()else A.StartScan(A.SelectedReward())end
+ end,'Scan auction prices',scanHelp)
+ frame.scanDisabledHelp=U.Hint(frame,440,-12,88,28,'Scan unavailable',scanHelp)
+ frame.settingsPanel=A.BuildSettings(frame)
  local function chooseSource()
   if UIDropDownMenu_Initialize and UIDropDownMenu_CreateInfo and UIDropDownMenu_AddButton and ToggleDropDownMenu then
    if not frame.sourceMenu then frame.sourceMenu=CreateFrame('Frame','WaylaidValueSourceMenu',frame,'UIDropDownMenuTemplate')end
@@ -118,7 +130,7 @@ local function create()
  frame.cratesPanel=CreateFrame('Frame',nil,frame);frame.cratesPanel:SetPoint('TOPLEFT',20,-106);frame.cratesPanel:SetSize(860,590)
  frame.rewards=A.BuildRewardsView(frame);frame.rewards:Hide()
  local crateTab,rewardTab
- local function tab(rewards)frame.rewards:SetShown(rewards);frame.cratesPanel:SetShown(not rewards);crateTab:SetActive(not rewards);rewardTab:SetActive(rewards);A.Refresh()end
+ local function tab(rewards)frame.settingsPanel:Hide();frame.rewards:SetShown(rewards);frame.cratesPanel:SetShown(not rewards);crateTab:SetActive(not rewards);rewardTab:SetActive(rewards);A.Refresh()end
  crateTab=U.Tab(frame,20,'Crates',function()tab(false)end,'Compare the cost of earning Favor with each crate and filling bundle. Select a row to see every accepted filling option.')
  rewardTab=U.Tab(frame,112,'Rewards',function()tab(true)end,'Browse profession rewards and compare crafting costs. Select an item for its recipe unlock, exact crate shopping plan and materials.');frame.crateTab=crateTab;frame.rewardTab=rewardTab;crateTab:SetActive(true);rewardTab:SetActive(false)
  frame.context=U.Text(frame,610,-65,266,'',nil,U.muted,'RIGHT')
@@ -144,11 +156,25 @@ local function create()
  U.Fill(frame,0,-702,900,1,U.line,'BORDER');frame.status=U.Text(frame,20,-713,670,'',nil,U.muted)
  U.HintText(frame,frame.status,'Price source status',function()return frame.status:GetText()..'\n\nRefresh re-reads cached quotes, not a new AH scan. If a provider is missing or fails, enable/configure it and try Refresh again.'end)
  local about=CreateFrame('Button',nil,frame);about:SetPoint('TOPLEFT',720,-705);about:SetSize(156,24);U.Text(about,0,-7,156,'About these prices',nil,U.muted,'RIGHT');frame.about=about
- U.Help(about,'About these prices',{'Cached unit buyout × quantity is an estimate; stock and full-stack costs are unverified.',"Refresh recalculates existing quotes. TSM does not share an age for the price used here; Auctionator age is shown when available.",netHelp..' Other tiers still need field confirmation.'})
+ U.Help(about,'About these prices',{'Cached unit buyout × quantity is an estimate; stock and full-stack costs are unverified.',"Refresh recalculates existing quotes. Scan AH collects new prices only at the AH. TSM does not share an age for its quote; your own scan uses its actual timestamp.",netHelp..' Other tiers still need field confirmation.'})
  about:SetScript('OnClick',U.ShowHelp)
- UISpecialFrames[#UISpecialFrames+1]='WaylaidValueFrame';frame:SetScript('OnShow',A.Refresh);frame:Hide()
+ UISpecialFrames[#UISpecialFrames+1]='WaylaidValueFrame';frame:SetScript('OnShow',A.Refresh)
+ frame:HookScript('OnHide',function()frame.settingsPanel:Hide()end);frame:Hide()
 end
 function A.Toggle()if not frame then create()end;frame:SetShown(not frame:IsShown())end
 function A.IsShown()return frame and frame:IsShown()end
 function A.SelectedReward()return frame and frame.rewards:IsShown()and frame.rewards.current and frame.rewards.current.reward or nil end
-function A.ScanChanged()if frame and frame:IsShown()then frame.status:SetText(A.scanState.message)end end
+function A.UpdateScanControls()
+ if not frame then return end
+ local enabled=A.scanState.running or A.ScanAvailable()
+ frame.scan:SetEnabled(enabled and true or false)
+ frame.scan:SetText(A.scanState.running and 'Stop scan'or 'Scan AH')
+ frame.scanDisabledHelp:SetShown(not enabled)
+end
+function A.ScanChanged()if frame then A.UpdateScanControls();if frame:IsShown()then frame.status:SetText(A.scanState.message)end end end
+function A.ToggleSettings()
+ if not frame then create()end
+ local wasOpen=frame:IsShown()and frame.settingsPanel:IsShown()
+ frame:Show();frame.settingsPanel:SetShown(not wasOpen)
+end
+function A.RefreshSettings()if frame then frame.settingsPanel:Refresh()end end

@@ -4,7 +4,7 @@
 
 New scanner tests drive real event/timer callbacks through localized-name search, exact ID matching, item/commodity ownership rules, pagination, rate-limit pauses, missing/unloaded data, competing searches, explicit stop, AH close, timeouts and market changes. Only complete scans replace a snapshot. Source-adapter tests verify explicit Scan mode, cached quotes, truthful timestamps and TSM/Auctionator priority. Item-tooltip tests exercise modern/legacy hooks, duplicate clearing, unknown item IDs, own-window suppression, Shift/compact/off modes and missing prices. UI callback checks exercise scan/stop commands, selected reward reagent scope and bag-hint settings.
 
-The proposed native Settings panel and Scan AH header button await design approval and have not been implemented. Real AH request handling, search restrictions, server event timing and native item-tooltip rendering remain unverified in Forever. No stable/public release of this candidate is claimed.
+The approved native Settings panel and Scan AH header controls are implemented. UI callback tests cover disabled scan reasons, start/stop behavior, menu help, retained selection/Favor, settings persistence, minimap hide/recovery/right-click and fixed window/panel bounds. The structural HTML implementation preview includes the settings panel; it is not a native-client screenshot. Real AH request handling, search restrictions, server event timing and native item-tooltip rendering remain unverified in Forever. No stable/public release of this candidate is claimed.
 
 ## 0.5.4 filling-material reminders
 

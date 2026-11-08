@@ -22,6 +22,7 @@ event:SetScript("OnEvent",function(_,kind,name)
   WaylaidValueDB.bagHints=WaylaidValueDB.bagHints~=false
   WaylaidValueDB.expert=WaylaidValueDB.expert==true
   if type(WaylaidValueDB.minimap)~="table" then WaylaidValueDB.minimap={} end
+  WaylaidValueDB.minimap.hide=WaylaidValueDB.minimap.hide==true
   local angle=tonumber(WaylaidValueDB.minimap.angle)
   WaylaidValueDB.minimap.angle=angle and angle==angle and math.abs(angle)<math.huge and angle%360 or 225
   SLASH_WAYLAIDVALUE1="/crates"
@@ -31,9 +32,10 @@ event:SetScript("OnEvent",function(_,kind,name)
     if command=='scan'then
       if A.scanState.running then A.CancelScan()else A.StartScan(A.SelectedReward and A.SelectedReward())end
     elseif command=='stop'then A.CancelScan()
+    elseif command=='settings'or command=='config'then A.ToggleSettings()
     elseif command:match('^tooltip ')then
       local mode=command:match('^tooltip (%a+)$')
-      if mode=='off'or mode=='compact'or mode=='shift'or mode=='always'then WaylaidValueDB.tooltipMode=mode
+      if mode=='off'or mode=='compact'or mode=='shift'or mode=='always'then WaylaidValueDB.tooltipMode=mode;if A.RefreshSettings then A.RefreshSettings()end
       elseif print then print('Waylaid Value: /crates tooltip off | compact | shift | always')end
     else A.Toggle()end
   end

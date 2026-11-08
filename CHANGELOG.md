@@ -6,7 +6,8 @@
 - Keep scan snapshots local to the realm/faction and show their actual timestamps; preserve TSM and Auctionator priority in Auto.
 - Add crate item-tooltip sections with Off, Compact, Shift and Always modes, without triggering AH requests on hover.
 - Preserve market-price ranking and owned-item reminders; scan quotes remain unit estimates, not stock-aware purchase plans.
-- Settings panel and header buttons await approval of their proposed composition.
+- Add the approved Settings panel and Scan AH / Stop scan header controls, including disabled-state explanations.
+- Save tooltip detail, bag reminders and minimap visibility immediately; right-click the minimap icon or use /crates settings to open preferences.
 
 ## 0.5.4
 

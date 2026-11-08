@@ -5,7 +5,7 @@ function A.CreateMinimapButton()
   local db=WaylaidValueDB.minimap
   local b=CreateFrame("Button","WaylaidValueMinimapButton",Minimap)
   b:SetSize(32,32);b:SetFrameStrata("MEDIUM");b:SetFrameLevel(8)
-  b:RegisterForClicks("LeftButtonUp");b:RegisterForDrag("LeftButton")
+  b:RegisterForClicks("LeftButtonUp","RightButtonUp");b:RegisterForDrag("LeftButton")
   local background=b:CreateTexture(nil,"BACKGROUND")
   background:SetSize(24,24);background:SetPoint("CENTER")
   background:SetTexture("Interface\\Minimap\\UI-Minimap-Background")
@@ -40,7 +40,12 @@ function A.CreateMinimapButton()
     end)
   end)
   b:SetScript("OnDragStop",stopDrag);b:SetScript("OnHide",stopDrag)
-  b:SetScript("OnClick",function() A.Toggle() end)
-  A.UI.Help(b,'Waylaid Value',{'Left-click to open or close Crates and Rewards.','Drag to move this icon around the minimap. Its position is saved.','You can also open the window with /crates or /waylaid.'})
-  A.minimapButton=b;place();b:Show()
+  b:SetScript("OnClick",function(_,button)if button=='RightButton'then A.ToggleSettings()else A.Toggle()end end)
+  A.UI.Help(b,'Waylaid Value',{'Left-click to open or close Crates and Rewards. Right-click for Settings.','Drag to move this icon around the minimap. Its position is saved.','You can also open Settings with /crates settings.'})
+  A.minimapButton=b;place();b:SetShown(not db.hide)
+end
+function A.SetMinimapVisible(on)
+ WaylaidValueDB.minimap.hide=not on
+ if not A.minimapButton then A.CreateMinimapButton()end
+ if A.minimapButton then A.minimapButton:SetShown(on)end
 end

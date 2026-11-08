@@ -12,12 +12,12 @@ Implemented independently in this checkpoint:
 - All existing crate/filling IDs plus the selected reward’s reagents, not an entire-AH scan.
 - A separate AH-scan price source and final Auto fallback, with true scan timestamps.
 - Native item-tooltip extension, exact crate IDs, compact/Shift/always/off modes, modern and legacy tooltip hooks, deduplication and suppression inside our own cost window. Hover never scans.
-- Slash commands provide a testable entry point while screen approval is pending.
+- Slash commands and approved native Scan AH / Stop scan controls provide entry points.
 
-Pending design approval: Settings and Scan AH controls in the existing header, a compact Settings panel with tooltip mode, bag reminders and minimap visibility. The approved Crates/Rewards organization and window dimensions stay unchanged. No native new-screen code is included yet.
+Design approved and implemented: Settings and Scan AH controls in the existing header, a compact Settings panel with tooltip mode, bag reminders and minimap visibility. Crates/Rewards organization and window dimensions stay unchanged. Right-click the minimap icon or use /crates settings to open preferences, including recovery when the minimap icon is hidden.
 
 Other ideas remain separate work, not silently added: whole-auction/stock-aware purchase optimization, Craftsman’s Writ reputation orders, editable unverified Favor payouts, an extra auction-house tab, Auctionator search handoff, and full localization. In particular, reusing the current unlimited unit-price Favor optimizer as a finite-stock purchase solver would be incorrect.
 
 API reference: Blizzard’s generated AuctionHouse documentation, mirrored at https://raw.githubusercontent.com/Gethe/wow-ui-source/live/Interface/AddOns/Blizzard_APIDocumentationGenerated/AuctionHouseDocumentation.lua. Runtime API detection guards client differences. Automated API doubles do not prove native server behavior; a user-started scan at the AH still needs field validation.
 
-The 0.6.0 candidate is not installed or published in this checkpoint. Public 0.5.4 downloads and marketplace files are unchanged.
+The 0.6.0 candidate is prepared for local field testing. Public 0.5.4 downloads and marketplace files are unchanged.

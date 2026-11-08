@@ -27,6 +27,8 @@ function methods:SetSize(w,h)self.width=w;self.height=h end
 function methods:SetPoint(...)self.point={...} end
 function methods:SetWidth(w)self.width=w end
 function methods:GetFont()return "Fonts/FRIZQT__.TTF",12,"" end
+function methods:GetFrameLevel()return 1 end
+function methods:SetFrameLevel(value)self.frameLevel=value end
 function methods:SetEnabled(v)self.enabled=v end
 function methods:Enable()self.enabled=true end
 function methods:Disable()self.enabled=false end
@@ -59,7 +61,7 @@ UIParent=new("Frame");UIParent.width=1280;UIParent.height=900;GameTooltip=new("T
 UnitLevel=function()return 60 end;date=function()return "12:00"end
 local fixture=dofile("tests/snapshot.lua")
 TSM_API={GetCustomPriceValue=function(_,item)return fixture[tonumber(item:match("i:(%d+)"))]end}
-for _,name in ipairs({"Data","Scan","Prices","Ranking","RewardsData","Rewards","ItemNames","ItemRequirements","Eligibility","Widgets","ItemTooltips","RewardsUI","UI","Minimap","Core"}) do assert(loadfile("addon/WaylaidValue/"..name..".lua"))("WaylaidValue",A) end
+for _,name in ipairs({"Data","Scan","Prices","Ranking","RewardsData","Rewards","ItemNames","ItemRequirements","Eligibility","Widgets","ItemTooltips","SettingsUI","RewardsUI","UI","Minimap","Core"}) do assert(loadfile("addon/WaylaidValue/"..name..".lua"))("WaylaidValue",A) end
 for _,o in ipairs(objects) do if o.scripts.OnEvent then o.scripts.OnEvent(o,"ADDON_LOADED","WaylaidValue") end end
 assert(type(SlashCmdList.WAYLAIDVALUE)=="function")
 SlashCmdList.WAYLAIDVALUE()
@@ -382,3 +384,38 @@ A.StartScan,A.CancelScan=oldStart,oldStop
 WaylaidValueDB.bagHints=false;GetItemCount=function()return 50 end;assert(A.BagCount(1)==nil)
 WaylaidValueDB.bagHints=true;assert(A.BagCount(1)==50);GetItemCount=nil
 print('PASS: slash scan/stop targets the selected reward; tooltip mode commands and bag-hint setting apply immediately.')
+-- Settings use the existing window and preserve the working selection/inputs.
+local settings=frame.settingsPanel
+local selectedReward=frame.rewards.current.reward.id
+local heldFavor=frame.rewards.held:GetText()
+frame.settingsButton.scripts.OnClick();assert(settings:IsShown()and settings.frameLevel==21)
+assert(settings.point[2]+settings:GetWidth()<=900 and settings.point[3]-settings:GetHeight()>=-730)
+settings.mode.scripts.OnClick();assert(#menu==4)
+for _,info in ipairs(menu)do assert(info.tooltipTitle and #info.tooltipText>20)end
+menu[4].func();assert(WaylaidValueDB.tooltipMode=='off'and settings.mode:GetText()=='Off')
+SlashCmdList.WAYLAIDVALUE('tooltip compact');assert(settings.mode:GetText()=='Compact only')
+settings.bags:SetChecked(false);settings.bags.scripts.OnClick(settings.bags)
+assert(not WaylaidValueDB.bagHints and frame.rewards.current.reward.id==selectedReward and frame.rewards.held:GetText()==heldFavor)
+settings.minimap:SetChecked(false);settings.minimap.scripts.OnClick(settings.minimap)
+assert(WaylaidValueDB.minimap.hide and not A.minimapButton:IsShown())
+settings.close.scripts.OnClick();assert(not settings:IsShown())
+SlashCmdList.WAYLAIDVALUE('settings');assert(settings:IsShown())
+settings.minimap:SetChecked(true);settings.minimap.scripts.OnClick(settings.minimap)
+assert(not WaylaidValueDB.minimap.hide and A.minimapButton:IsShown())
+frame:Hide();assert(not settings:IsShown())
+A.minimapButton.scripts.OnClick(A.minimapButton,'RightButton');assert(frame:IsShown()and settings:IsShown())
+frame.crateTab.scripts.OnClick(frame.crateTab);assert(not settings:IsShown())
+assert(frame.settingsButton.point[2]+frame.settingsButton:GetWidth()<frame.scan.point[2])
+assert(frame.scan.point[2]+frame.scan:GetWidth()<frame.source.point[2])
+A.scanState.open=false;A.UpdateScanControls()
+assert(not frame.scan.enabled and frame.scanDisabledHelp:IsShown()and helpText(frame.scanDisabledHelp):find('Open the auction house'))
+local oldAvailable=A.ScanAvailable
+A.ScanAvailable=function()return true end;A.ScanChanged();assert(frame.scan.enabled and not frame.scanDisabledHelp:IsShown())
+started,stopped=0,0
+A.StartScan=function()started=started+1;A.scanState.running=true;A.ScanChanged()end
+A.CancelScan=function()stopped=stopped+1;A.scanState.running=false;A.ScanChanged()end
+frame.scan.scripts.OnClick();assert(started==1 and frame.scan:GetText()=='Stop scan')
+frame.scan.scripts.OnClick();assert(stopped==1 and frame.scan:GetText()=='Scan AH')
+A.StartScan,A.CancelScan,A.ScanAvailable=oldStart,oldStop,oldAvailable
+local previousCount=#objects;SlashCmdList.WAYLAIDVALUE('settings');settings.close.scripts.OnClick();SlashCmdList.WAYLAIDVALUE('settings');assert(#objects==previousCount)
+print('PASS: native Settings callbacks, minimap hide/recovery/right-click, retained selection and Favor, menu help, fixed window bounds, disabled scan reasons and start/stop controls.')

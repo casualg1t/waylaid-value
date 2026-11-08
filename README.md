@@ -6,7 +6,7 @@ Version **0.6.0 candidate** · Interface **16001** · MIT license
 
 ## Candidate status
 
-The public release remains 0.5.4. Version 0.6.0 adds an independently implemented, user-started targeted AH scanner and optional crate item-tooltip sections. The Settings/Scan-button composition is pending design approval; its native panel is not implemented in this checkpoint. The scanner has automated callback coverage but still needs testing in the Forever client.
+The public release remains 0.5.4. Version 0.6.0 adds an independently implemented, user-started targeted AH scanner and optional crate item-tooltip sections. The approved native header includes **Scan AH** and **Settings**. Settings controls crate tooltip detail, bag reminders and minimap visibility; open it from the header, `/crates settings`, or right-clicking the minimap icon. The scanner has automated callback coverage but still needs testing in the Forever client.
 
 At the AH, `/crates scan` starts or stops a scan of all catalogue crates and filling materials, plus reagents for the reward currently selected in Rewards. `/crates stop` cancels it. Successful scans select **AH scan** as the price source. Incomplete scans leave the previous snapshot intact. Data stays local, separated by realm and faction.
 

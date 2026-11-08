@@ -17,6 +17,7 @@ ItemRequirements.lua
 Eligibility.lua
 Widgets.lua
 ItemTooltips.lua
+SettingsUI.lua
 RewardsUI.lua
 UI.lua
 Minimap.lua
