@@ -2,7 +2,7 @@
 
 Compare the gold cost of Waylaid Crates and plan Merchant's Favor recipe unlocks in **World of Warcraft: Forever**.
 
-Version **0.6.0 candidate** · Interface **16001** · MIT license
+Version **0.6.1 candidate** · Interface **16001** · MIT license
 
 ## Candidate status
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.1 candidate
+
+- Match compact WoW money notation: colored denomination letters, two-digit silver/copper below gold, and explicit zero denominations (for example, 6g 06s 90c and 59g 00s 00c).
+
 ## 0.6.0 candidate — not publicly released
 
 - Add an independent targeted AH scanner, started/stopped with `/crates scan`, with guarded pagination, throttling, cancellation and atomic snapshot replacement.

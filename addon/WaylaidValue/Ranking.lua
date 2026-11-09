@@ -42,9 +42,9 @@ function A.Money(copper,colored)
   local gold, silver, coin = math.floor(copper/10000), math.floor(copper/100)%100, copper%100
   if colored then
    local parts={}
-   if gold>0 then parts[#parts+1]=gold..'|cffffd166g|r'end
-   if silver>0 then parts[#parts+1]=silver..'|cffc7c7cfs|r'end
-   if coin>0 or #parts==0 then parts[#parts+1]=coin..'|cffeda55fc|r'end
+   if gold>0 then parts[#parts+1]=gold..'|cffffd700g|r'end
+   if gold>0 or silver>0 then parts[#parts+1]=(gold>0 and string.format('%02d',silver)or tostring(silver))..'|cffc7c7cfs|r'end
+   parts[#parts+1]=(gold>0 or silver>0)and(string.format('%02d',coin)..'|cffeda55fc|r')or(coin..'|cffeda55fc|r')
    return sign..table.concat(parts,' ')
   end
   if gold > 0 then return string.format("%s%dg %ds %dc",sign,gold,silver,coin) end
