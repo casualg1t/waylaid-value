@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.2 candidate
+
+- Sort Rewards by required character level, lowest first, then item name; unknown levels appear last.
+- Show the required level directly in each reward row alongside Favor, retaining the one-craft price column.
+
 ## 0.6.1 candidate
 
 - Match compact WoW money notation: colored denomination letters, two-digit silver/copper below gold, and explicit zero denominations (for example, 6g 06s 90c and 59g 00s 00c).

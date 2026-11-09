@@ -77,3 +77,21 @@ local filters={profession='mine',usable=true,skill=true,role='all'}
 assert(#A.FilterRewards(A.Rewards,screenshotProfile,filters)==24)
 filters.role='auto';assert(#A.FilterRewards(A.Rewards,screenshotProfile,filters)==13)
 print('PASS: rarity facts, separate equip/role checks, hunter/healer affinity, hybrid spell gear, unknown roles and general-use bombs.')
+
+-- Required character level, not recipe/vendor level or profession skill.
+local fixtures={
+ {id=9001,name='Z low',profession='Other',level=60,skill=300},
+ {id=9002,name='A high',profession='Other',level=1,skill=1},
+ {id=9003,name='Unknown',profession='Other'},
+ {id=9004,name='B low',profession='Other'},
+ {id=9005,name='No level requirement',profession='Other'},
+}
+A.ItemRequirements[9001]={known=true,level=12};A.ItemRequirements[9002]={known=true,level=20}
+A.ItemRequirements[9004]={known=true,level=12};A.ItemRequirements[9005]={known=true,level=0}
+GetItemInfo=nil;C_Item=nil
+local ordered=A.FilterRewards(fixtures,hunter,{profession='all'})
+assert(ordered[1].reward.id==9005 and ordered[2].reward.id==9004 and ordered[3].reward.id==9001)
+assert(ordered[4].reward.id==9002 and ordered[5].reward.id==9003 and ordered[5].requiredLevel==nil)
+GetItemInfo=function(id)if id==9002 then return 'Live name','link',3,50,8 end end
+ordered=A.FilterRewards(fixtures,hunter,{profession='all'});assert(ordered[2].reward.id==9002 and ordered[2].requiredLevel==8)
+print('PASS: reward sorting by required item level, alphabetical ties, unknown levels last and live requirement precedence.')

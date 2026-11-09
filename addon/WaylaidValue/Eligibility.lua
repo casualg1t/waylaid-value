@@ -160,10 +160,17 @@ function A.FilterRewards(rewards,profile,options)
    local armorOK=not options.armor or options.armor==''or(meta and meta.classID==4 and meta.subclassID==options.armor)
    if unknown then summary.unknown=summary.unknown+1 end
    if armorOK and A.RoleMatch(reward,profile,options.role)and(not options.usable or usable==true)and(not options.skill or skilled==true)then
-    rows[#rows+1]={reward=reward,usable=usable,useReason=useReason,skilled=skilled,skillReason=skillReason}
+    local level=meta and meta.level
+    if type(level)~='number'or level~=level or level<0 or level>=math.huge then level=nil end
+    rows[#rows+1]={reward=reward,requiredLevel=level,usable=usable,useReason=useReason,skilled=skilled,skillReason=skillReason}
    else summary.hidden=summary.hidden+1 end
   end
  end
- table.sort(rows,function(a,b)return a.reward.name<b.reward.name end)
+ table.sort(rows,function(a,b)
+  local al,bl=a.requiredLevel or math.huge,b.requiredLevel or math.huge
+  if al~=bl then return al<bl end
+  if a.reward.name~=b.reward.name then return a.reward.name<b.reward.name end
+  return (a.reward.id or 0)<(b.reward.id or 0)
+ end)
  return rows,summary
 end

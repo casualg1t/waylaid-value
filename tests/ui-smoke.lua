@@ -419,3 +419,12 @@ frame.scan.scripts.OnClick();assert(stopped==1 and frame.scan:GetText()=='Scan A
 A.StartScan,A.CancelScan,A.ScanAvailable=oldStart,oldStop,oldAvailable
 local previousCount=#objects;SlashCmdList.WAYLAIDVALUE('settings');settings.close.scripts.OnClick();SlashCmdList.WAYLAIDVALUE('settings');assert(#objects==previousCount)
 print('PASS: native Settings callbacks, minimap hide/recovery/right-click, retained selection and Favor, menu help, fixed window bounds, disabled scan reasons and start/stop controls.')
+
+frame.rewardTab.scripts.OnClick(frame.rewardTab);frame.rewards.navButtons.all.scripts.OnClick()
+local previous=-1
+for i,entry in ipairs(frame.rewards.visible)do
+ local level=entry.requiredLevel or math.huge;assert(level>=previous);previous=level
+ assert(frame.rewards.listRows[i].favor:GetText():find('Lv ',1,true))
+ assert(frame.rewards.listRows[i].favor:GetWidth()==88)
+end
+print('PASS: native reward rows show required levels and follow the level sort without changing row height or craft-price column.')
