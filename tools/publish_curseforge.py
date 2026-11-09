@@ -13,7 +13,7 @@ import urllib.request
 import uuid
 import zipfile
 
-API = 'https://www.curseforge.com/api'
+API = 'https://wow.curseforge.com/api'
 PROJECT = 1792380
 
 
@@ -67,7 +67,7 @@ def main():
         req = urllib.request.Request(API + '/game/versions', headers=headers)
         with urllib.request.urlopen(req, timeout=60) as response:
             versions = json.load(response)
-        matches = [v for v in versions if v['name'] == '1.60.1']
+        matches = [v for v in versions if v['name'] == '1.60.1' and v.get('apiVersion') == '16001']
         if len(matches) != 1:
             raise ValueError('Forever 1.60.1 did not resolve uniquely; no upload attempted')
         metadata['gameVersions'] = [matches[0]['id']]
