@@ -1,0 +1,38 @@
+name: Publish CurseForge
+on:
+  release:
+    types: [published]
+permissions:
+  contents: read
+concurrency:
+  group: curseforge-${{ github.event.release.tag_name }}
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.release.tag_name }}
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Install check dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.1
+          python -m pip install -r requirements-dev.txt
+      - name: Test and build release
+        env:
+          LUA: lua5.1
+        run: python tools/check.py
+      - name: Upload tested Forever ZIP
+        env:
+          CF_API_KEY: ${{ secrets.CF_API_KEY }}
+        run: python tools/publish_curseforge.py --upload

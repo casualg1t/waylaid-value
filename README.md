@@ -2,11 +2,11 @@
 
 Compare the gold cost of Waylaid Crates and plan Merchant's Favor recipe unlocks in **World of Warcraft: Forever**.
 
-Version **0.6.2 candidate** · Interface **16001** · MIT license
+Version **0.6.2** · Interface **16001** · MIT license
 
-## Candidate status
+## AH scanning and tooltips
 
-The public release remains 0.5.4. Version 0.6.0 adds an independently implemented, user-started targeted AH scanner and optional crate item-tooltip sections. The approved native header includes **Scan AH** and **Settings**. Settings controls crate tooltip detail, bag reminders and minimap visibility; open it from the header, `/crates settings`, or right-clicking the minimap icon. The scanner has automated callback coverage but still needs testing in the Forever client.
+Version 0.6 adds an independently implemented, user-started targeted AH scanner and optional crate item-tooltip sections. The approved native header includes **Scan AH** and **Settings**. Settings controls crate tooltip detail, bag reminders and minimap visibility; open it from the header, `/crates settings`, or right-clicking the minimap icon. The scanner has automated callback coverage but still needs testing in the Forever client.
 
 At the AH, `/crates scan` starts or stops a scan of all catalogue crates and filling materials, plus reagents for the reward currently selected in Rewards. `/crates stop` cancels it. Successful scans select **AH scan** as the price source. Incomplete scans leave the previous snapshot intact. Data stays local, separated by realm and faction.
 
@@ -35,7 +35,7 @@ Open **`/crates`**, **`/waylaid`**, or the draggable crate icon on the minimap. 
 
 Download the **WaylaidValue ZIP**, rather than GitHub's source-code archive. Quit WoW, extract the `WaylaidValue` folder into `_forever_/Interface/AddOns/`, and restart. The TOC must be directly inside `AddOns/WaylaidValue/`. When updating, replace the addon folder and retain SavedVariables.
 
-Use **TSM with TSM AppHelper**, or an Auctionator build exposing the v1 price API. OneForAll is not required. Without a price provider, the catalogue remains accessible but costs are unavailable.
+Use **TSM with TSM AppHelper**, or an Auctionator build exposing the v1 price API. OneForAll is not required. Alternatively, use Scan AH while the auction house is open to collect local price estimates. Without any prices, the catalogue remains accessible but costs are unavailable.
 
 ## Prices and calculations
 

@@ -1,6 +1,6 @@
 # Release preparation
 
-The addon publishes under its dedicated GitHub identity, casualg1t. The previous repository remains a private backup. Uploading a CurseForge file and publishing a GitHub release are separate actions. No marketplace API credentials are stored here. The first marketplace upload is manual.
+The addon publishes under its dedicated GitHub identity, casualg1t. The previous repository remains a private backup. Uploading a CurseForge file and publishing a GitHub release are separate actions. No marketplace API credentials are stored here. The first marketplace upload was manual. Subsequent GitHub releases can upload through the official CurseForge API.
 
 ## Before the first public download
 
@@ -19,7 +19,7 @@ Official guidance: https://support.curseforge.com/support/solutions/articles/900
 
 ## GitHub
 
-A draft release can hold the candidate ZIP and notes without making a public download release. After field validation, publish the draft. For subsequent versions, update the TOC/changelog, run checks, commit/tag the exact source and attach the newly generated ZIP. CI runs checks on pushes and pull requests, but does not publish to marketplaces.
+A draft release can hold the candidate ZIP and notes without making a public download release. After field validation, publish the draft. For subsequent versions, update the TOC/changelog, run checks, commit/tag the exact source and attach the newly generated ZIP. CI runs checks on pushes and pull requests. The Publish CurseForge workflow runs on a published GitHub release, checks the tagged source and uploads its generated Forever ZIP.
 
 ## Other hosts
 
@@ -55,3 +55,15 @@ The first CurseForge file is registered as file 9514517, Release, Forever 1.60.1
 The CurseForge CDN ZIP was downloaded and verified byte-for-byte against the public GitHub ZIP. The console advanced to `Processing`; moderation approval was not observed. Both real screenshots were uploaded to the gallery, captioned and saved. Do not re-upload merely because the status has not advanced.
 
 The custom listing mark was replaced on CurseForge with the actual `INV_Crate_07` game icon at the user’s request. The unmodified source asset and attribution are retained in `assets/`; the obsolete custom mark and generator were removed.
+
+## Automated uploads
+
+Add the CurseForge author token as the repository Actions secret `CF_API_KEY` (never in source). Official token page: https://authors.curseforge.com/#/account/api-tokens. Publish a GitHub release with tag `vX.Y.Z` and release notes; `.github/workflows/curseforge.yml` checks the source, verifies tag/TOC/Forever metadata, resolves game version 1.60.1 and uploads to project 1792380. Prereleases upload as Beta; normal releases as Release. CurseForge moderation still applies. No upload happens on an ordinary commit or tag alone.
+
+Use the same checked ZIP as the GitHub install asset, named `WaylaidValue-X.Y.Z-forever.zip` for WoWUp. An upload has no automatic retry: after an ambiguous failure, check the author file list before rerunning the job to avoid duplicates. Existing manually uploaded versions must not be replayed through the workflow. `python3 tools/publish_curseforge.py --event /path/to/release-event.json` validates locally without uploading; only `--upload` sends a file.
+
+API reference: https://support.curseforge.com/support/solutions/articles/9000197321
+
+## Release checkpoint — 9 November 2026
+
+Version 0.6.2 passes the full checks under both installed Lua and Lua 5.1. The existing CurseForge file 9514517 (0.5.4) was observed Approved in the author console. Version 0.6.2 includes the level-sorted rewards, money formatting and experimental scanner/settings additions; its release notes disclose the remaining server scan validation. The publishing workflow is prepared; it requires the repository secret before an automatic upload can succeed.
